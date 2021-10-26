@@ -3,7 +3,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-parser</artifactId>
-	<version>0.0.13-SNAPSHOT</version>
+	<version>0.0.13</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-parser</name>
