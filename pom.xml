@@ -122,6 +122,7 @@
 						<image>registry-1.docker.io/lavandadelpatio/filebot-parser</image>
 						<tags>
 							<tag>${project.version}</tag>
+							<tag>${project.version}-${TRIMMED_SHA}</tag>
 							<tag>latest</tag>
 						</tags>
 					</to>
