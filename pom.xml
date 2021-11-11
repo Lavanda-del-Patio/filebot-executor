@@ -21,14 +21,6 @@
 		<project.scm.id>github</project.scm.id>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>GitHub luiscajl Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/Lavanda-del-Patio/lavanda-microservices</url>
-		</repository>
-	</distributionManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>es.lavanda</groupId>
