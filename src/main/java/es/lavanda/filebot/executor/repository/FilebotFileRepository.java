@@ -1,9 +1,9 @@
-package es.lavanda.filebot.parser.repository;
+package es.lavanda.filebot.executor.repository;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import es.lavanda.filebot.parser.model.FilebotFile;
+import es.lavanda.filebot.executor.model.FilebotFile;
 
 
 @Repository

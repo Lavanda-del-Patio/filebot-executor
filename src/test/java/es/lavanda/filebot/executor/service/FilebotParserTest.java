@@ -1,4 +1,4 @@
-package es.lavanda.filebot.parser;
+package es.lavanda.filebot.executor.service;
 
 import lombok.SneakyThrows;
 
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import es.lavanda.filebot.parser.util.FilebotParser;
+import es.lavanda.filebot.executor.util.FilebotParser;
 
 @ExtendWith(MockitoExtension.class)
 public class FilebotParserTest {

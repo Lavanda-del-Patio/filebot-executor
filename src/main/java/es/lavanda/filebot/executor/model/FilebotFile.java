@@ -1,4 +1,4 @@
-package es.lavanda.filebot.parser.model;
+package es.lavanda.filebot.executor.model;
 
 import java.util.Date;
 

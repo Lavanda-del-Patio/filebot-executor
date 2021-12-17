@@ -1,4 +1,4 @@
-package es.lavanda.filebot.parser;
+package es.lavanda.filebot.executor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package es.lavanda.filebot.parser.util;
+package es.lavanda.filebot.executor.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import es.lavanda.filebot.parser.model.Filebot;
+import es.lavanda.filebot.executor.model.Filebot;
 import es.lavanda.lib.common.SnsTopic;
 import es.lavanda.lib.common.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;

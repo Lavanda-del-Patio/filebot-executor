@@ -1,4 +1,4 @@
-package es.lavanda.filebot.parser.exception;
+package es.lavanda.filebot.executor.exception;
 
 public class FilebotParserException extends RuntimeException {
 
