@@ -1,11 +1,14 @@
 spring:
-    data: 
+    data:
         mongodb:
             authentication-database: admin
-            database: test 
-            host: localhost 
-            password:  example
-            port: 27017 
+            database: test
+            host: localhost
+            password: example
+            port: 27017
             username: root
 filebot:
-    path: src/main/resources/filebot/            
+    path:
+        input: src/main/resources/filebot
+        output: src/main/resources/filebot_output
+        data: src/main/resources/filebot_data

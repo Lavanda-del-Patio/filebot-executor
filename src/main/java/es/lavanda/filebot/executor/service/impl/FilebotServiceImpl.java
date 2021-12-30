@@ -3,130 +3,164 @@ package es.lavanda.filebot.executor.service.impl;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.DirectoryStream.Filter;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
-import es.lavanda.filebot.executor.exception.FilebotParserException;
-import es.lavanda.filebot.executor.model.Filebot;
-import es.lavanda.filebot.executor.model.FilebotFile;
-import es.lavanda.filebot.executor.repository.FilebotFileRepository;
-import es.lavanda.filebot.executor.repository.FilebotRepository;
+import es.lavanda.filebot.executor.exception.FilebotExecutorException;
+import es.lavanda.filebot.executor.model.FilebotExecution;
+import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
+import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FilebotService;
-import es.lavanda.filebot.executor.util.FilebotParser;
+import es.lavanda.filebot.executor.util.FilebotConstants;
+import es.lavanda.filebot.executor.util.FilebotUtils;
+import es.lavanda.filebot.executor.util.StreamGobbler;
+import es.lavanda.lib.common.SnsTopic;
+import es.lavanda.lib.common.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
+import java.io.File;
 
 @Service
 @Slf4j
 public class FilebotServiceImpl implements FilebotService {
-    
-    @Autowired
-    private FilebotRepository filebotRepository;
 
     @Autowired
-    private FilebotFileRepository filebotFileRepository;
+    private FilebotExecutionRepository filebotExecutionRepository;
 
     @Autowired
-    private FilebotParser filebotParser;
+    private ExecutorService executorService;
 
-    @Value("${filebot.path}")
-    private String FILEBOT_PATH;
+    @Autowired
+    private NotificationService notificationService;
 
+    @Autowired
+    private FilebotUtils filebotUtils;
 
-    private String getHtmlData(String filePath) {
+    @Override
+    public void execute() {
+        List<Path> paths = getAllFilesFounded(filebotUtils.getFilebotPathInput());
+        paths.forEach(path -> {
+            log.info(path.toString());
+            FilebotExecution filebotExecution = new FilebotExecution();
+            filebotExecution.setFolderPath(path);
+            filebotExecution.setCommand(filebotUtils.getFilebotCommand(path));
+            filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
+            save(filebotExecution);
+            String execution = filebotExecution(filebotExecution);
+            filebotExecution.setStatus(FilebotStatus.PROCESSING);
+            save(filebotExecution);
+            if (isNotLicensed(execution)) {
+                log.info("Is not licensed");
+                tryRegistered();
+            } else if (needsNonStrictOrQuery(execution)) {
+                log.info("Needs non-strict or query");
+                // producerService.sendFilebotExecution(filebotExecution);
+            } else if (isChooseOptions(execution)) {
+                log.info("Needs select options");
+                // producerService.sendFilebotExecution(filebotExecution);
+            } else {
+                log.info("Moved files. All correct");
+            }
+        });
+    }
+
+    private boolean isChooseOptions(String execution) {
+        return false;
+    }
+
+    private boolean needsNonStrictOrQuery(String execution) {
+        if (execution.contains("Consider using -non-strict to enable opportunistic matching")) {
+            return true;
+        }
+        return false;
+    }
+
+    private String filebotExecution(FilebotExecution filebot) throws FilebotExecutorException {
         try {
-            return Files.readString(Path.of(filePath));
-        } catch (IOException e) {
-            log.error("Can not access to path {}", FILEBOT_PATH, e);
-            throw new FilebotParserException("Can not access to path", e);
+            Process process = new ProcessBuilder("bash", "-c", filebot.getCommand()).redirectErrorStream(true)
+                    .start();
+            StringBuilder sbuilder = new StringBuilder();
+            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
+                log.debug("Filebot commandline: {}", line);
+                sbuilder.append(line);
+                sbuilder.append(System.getProperty("line.separator"));
+            });
+            executorService.submit(streamGobbler);
+            int status = process.waitFor();
+            if (status != 0) {
+                log.error("Todo mal");
+            } else {
+                log.error("Todo bien");
+            }
+            return sbuilder.toString();
+        } catch (InterruptedException | IOException e) {
+            log.error("Exception on command line transcode", e);
+            Thread.currentThread().interrupt();
+            throw new FilebotExecutorException("Exception on command line transcode", e);
         }
     }
 
-    private List<FilebotFile> getAllFilesFounded(String path) {
+    private String tryRegistered() {
+        log.info("Try register filebot");
+        try {
+            Process process = new ProcessBuilder("bash", "-c",
+                    "filebot --license " + filebotUtils.getFilebotPathData() + " license.psm")
+                            .redirectErrorStream(true)
+                            .start();
+            StringBuilder sbuilder = new StringBuilder();
+            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
+                log.debug("Filebot commandline: {}", line);
+                sbuilder.append(line);
+            });
+            executorService.submit(streamGobbler);
+            int status = process.waitFor();
+            if (status != 0) {
+                log.error("Todo mal");
+            } else {
+                log.error("Todo bien");
+            }
+            return sbuilder.toString();
+        } catch (InterruptedException | IOException e) {
+            log.error("Exception on command line transcode", e);
+            Thread.currentThread().interrupt();
+            throw new FilebotExecutorException("Exception on command line transcode", e);
+        }
+    }
+
+    private boolean isNotLicensed(String lines) {
+        log.info("Checking if is licensed");
+        if (lines.contains("License Error: UNREGISTERED")) {
+            // notificationService.send(SnsTopic.TELEGRAM_MESSAGE, "Filebot not registered.
+            // Please fix it", "filebot-execution");
+            return true;
+        }
+        return false;
+    }
+    private FilebotExecution save(FilebotExecution filebotExecution) {
+        return filebotExecutionRepository.save(filebotExecution);
+    }
+
+    private List<Path> getAllFilesFounded(String path) {
         try (Stream<Path> walk = Files.walk(Paths.get(path))) {
-
-            return walk.filter(Files::isRegularFile).map(filePath -> new FilebotFile(filePath.toString()))
+            List<Path> paths = walk.filter(Files::isDirectory)
                     .collect(Collectors.toList());
+            paths.remove(0);
+            return paths;
         } catch (IOException e) {
-            log.error("Can not access to path {}", FILEBOT_PATH, e);
-            throw new FilebotParserException("Can not access to path", e);
+            log.error("Can not access to path {}", filebotUtils.getFilebotPathInput(), e);
+            throw new FilebotExecutorException("Can not access to path", e);
         }
     }
-
-
-    // @Override
-    // public void run(String... args) throws Exception {
-    //     log.info("Start schedule parse new files");
-    //     List<FilebotFile> newFiles = getAllFilesFounded(FILEBOT_PATH);
-    //     List<FilebotFile> oldFiles = (List<FilebotFile>) filebotFileRepository.findAll();
-    //     newFiles.removeAll(oldFiles);
-    //     newFiles.forEach(file -> {
-    //         log.info("Parsing new file {}", file.getFilePath());
-    //         List<Filebot> filebots = filebotParser.parseHtml(getHtmlData(file.getFilePath()));
-    //         filebotRepository.saveAll(filebots);
-    //         filebotFileRepository.save(file);
-    //     });
-    //     log.info("Finish schedule parse new files");        
-    // }
-
-
-
-    // public int transcode(TranscodeMediaDTO transcodeMediaDTO) throws TranscoderException {
-    //     log.info("Transcoding file {}", transcodeMediaDTO.toString());
-    //     transcodeMediaDTO.setActive(true);
-    //     producerService.sendStatus(transcodeMediaDTO);
-    //     try {
-    //         finalTime = 0;
-    //         Process process = new ProcessBuilder("bash", "-c", transcodeMediaDTO.getCommand()).redirectErrorStream(true)
-    //                 .start();
-    //         StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
-    //             log.debug("FFMPEG commandline: {}", line);
-    //             Matcher progressMatcher = progreesVideoPattern.matcher(line);
-    //             Matcher durationVideoMatcher = durationVideoPattern.matcher(line);
-    //             if (progressMatcher.find()) {
-    //                 double diference = getDifference(finalTime, progressMatcher.group(0));
-    //                  transcodeMediaDTO.setProcessed(diference);
-    //                 if ((Math.round(transcodeMediaDTO.getProcessed() * 100.0) / 100.0) != 100) {
-    //                     try {
-    //                         producerService.sendStatus(transcodeMediaDTO);
-    //                     } catch (TranscoderException e) {
-    //                         log.error("Runtime transcoderException", e);
-    //                         throw new TranscoderRuntimeException("Runtime transcoderException", e);
-    //                     }
-    //                 }
-    //             }
-    //             if (durationVideoMatcher.find()) {
-    //                 log.debug("durationVideoMatcher found: {}", durationVideoMatcher.group(0));
-    //                 finalTime = getDuration(durationVideoMatcher.group(0));
-    //             }
-    //         });
-    //         executorService.submit(streamGobbler);
-    //         int status = process.waitFor();
-    //         if (status != 0) {
-    //             transcodeMediaDTO.setProcessed(0);
-    //             transcodeMediaDTO.setError(true);
-    //         } else {
-    //             transcodeMediaDTO.setProcessed(100);
-    //         }
-    //         transcodeMediaDTO.setActive(false);
-    //         producerService.sendStatus(transcodeMediaDTO);
-    //         log.info("File {} transcode with status {}", transcodeMediaDTO.toString(), status);
-    //         return status;
-    //     } catch (InterruptedException | IOException e) {
-    //         log.error("Exception on command line transcode", e);
-    //         transcodeMediaDTO.setProcessed(0);
-    //         transcodeMediaDTO.setError(true);
-    //         transcodeMediaDTO.setActive(false);
-    //         producerService.sendStatus(transcodeMediaDTO);
-    //         Thread.currentThread().interrupt();
-    //         throw new TranscoderException("Exception on command line transcode", e);
-    //     }
-    // }
 }
