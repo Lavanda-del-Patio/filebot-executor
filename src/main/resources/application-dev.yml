@@ -1,8 +1,21 @@
 spring:
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: user
+        password: bitnami
+        listener:
+            simple:
+                retry:
+                    enabled: true
+                    initial-interval: 3s
+                    max-attempts: 1
+                    max-interval: 10s
+                    multiplier: 2
     data:
         mongodb:
             authentication-database: admin
-            database: test
+            database: lavanda
             host: localhost
             password: example
             port: 27017

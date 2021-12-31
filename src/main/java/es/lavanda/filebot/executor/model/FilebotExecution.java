@@ -2,6 +2,7 @@ package es.lavanda.filebot.executor.model;
 
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,16 +24,16 @@ public class FilebotExecution {
     private String id;
 
     @Field("file_name")
-    private String filePath;
+    private List<String> filesName;
 
     @Field("new file_name")
-    private String originalName;
+    private List<String> newFilesName;
 
     @Field("folder_path")
-    private Path folderPath;
+    private String folderPath;
 
     @Field("new_folder_path")
-    private Path newPath;
+    private String newFolderPath;
 
     @Field("command")
     private String command;
