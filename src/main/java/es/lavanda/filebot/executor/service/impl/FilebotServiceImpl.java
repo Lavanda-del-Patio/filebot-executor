@@ -82,6 +82,7 @@ public class FilebotServiceImpl implements FilebotService {
                     // producerService.sendFilebotExecution(filebotExecution);
                 } else if (isChooseOptions(execution.toString())) {
                     log.info("Needs select options");
+                    selectOptions(filebotExecution, execution.toString());
                     // producerService.sendFilebotExecution(filebotExecution);
                 } else {
                     log.info("Moved files. All correct");
@@ -99,6 +100,15 @@ public class FilebotServiceImpl implements FilebotService {
 
         });
         log.info("Finished execution Filebot Service");
+    }
+
+    private void selectOptions(FilebotExecution filebotExecution, String string) {
+        // FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
+        // filebotExecutionIDTO.setId(filebotExecution.getId());
+        // filebotExecutionIDTO.setFiles(filebotExecution.getFilesName());
+        // filebotExecutionIDTO.setPath(filebotExecution.getFolderPath());
+        // filebotExecution.setPossibilities(Arrays.asList(string.split("\n")));
+        // producerService.sendFilebotExecution(filebotExecutionIDTO);
     }
 
     private void strictOrQuery(FilebotExecution filebotExecution, String execution) {
@@ -120,6 +130,7 @@ public class FilebotServiceImpl implements FilebotService {
     }
 
     private boolean isChooseOptions(String execution) {
+
         return false;
     }
 
