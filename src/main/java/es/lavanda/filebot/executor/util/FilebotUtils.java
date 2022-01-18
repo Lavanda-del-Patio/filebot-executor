@@ -27,6 +27,11 @@ public class FilebotUtils {
                 FilebotConstants.NON_STRICT.toString();
     }
 
+    public String getRegisterCommand(Path folderPath) {
+        return FILEBOT + FilebotConstants.LICENSE.toString() +
+                getFilebotPathData().trim() + "license.psm";
+    }
+
     public String getFilebotCommand(Path folderPath) {
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
                 getOutputFormat() +

@@ -9,7 +9,8 @@ public enum FilebotConstants {
     ACTION_MOVE(" --action move "),
     LANG_ES(" --lang es "),
     ORDER_AIRDATE(" --order Airdate "),
-    DEF(" --def ");
+    DEF(" --def "),
+    LICENSE(" --license ");
 
     private final String text;
 

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.DirectoryStream.Filter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,12 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
+import es.lavanda.filebot.executor.amqp.ProducerService;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FilebotService;
-import es.lavanda.filebot.executor.service.ProducerService;
 import es.lavanda.filebot.executor.util.FilebotConstants;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.filebot.executor.util.StreamGobbler;
@@ -63,6 +64,17 @@ public class FilebotServiceImpl implements FilebotService {
         log.info("Executing Filebot Service");
         List<Path> paths = getAllFilesFounded(filebotUtils.getFilebotPathInput());
         paths.forEach(path -> {
+            filebotExecutionRepository.findByFolderPath(path.toString()).ifPresentOrElse((filebotExecution)->{
+                if (filebotExecution.getStatus().equals(FilebotStatus.PROCESSED)){
+
+                }
+            },()-> {
+
+
+
+            });
+            });
+
             if (Boolean.FALSE.equals(filebotExecutionRepository.existsByFolderPath(path.toString()))) {
                 log.info(path.toString());
                 FilebotExecution filebotExecution = new FilebotExecution();
@@ -79,11 +91,13 @@ public class FilebotServiceImpl implements FilebotService {
                 } else if (needsNonStrictOrQuery(execution.toString())) {
                     log.info("Needs non-strict or query");
                     strictOrQuery(filebotExecution, execution.toString());
-                    // producerService.sendFilebotExecution(filebotExecution);
+                    filebotExecution.setStatus(FilebotStatus.PROCESSING);
+                    save(filebotExecution);
                 } else if (isChooseOptions(execution.toString())) {
                     log.info("Needs select options");
                     selectOptions(filebotExecution, execution.toString());
-                    // producerService.sendFilebotExecution(filebotExecution);
+                    filebotExecution.setStatus(FilebotStatus.PROCESSING);
+                    save(filebotExecution);
                 } else {
                     log.info("Moved files. All correct");
                     // fillFilebotExecution(filebotExecution, execution.toString());
@@ -129,79 +143,11 @@ public class FilebotServiceImpl implements FilebotService {
         producerService.sendFilebotExecution(filebotExecutionIDTO);
     }
 
-    private boolean isChooseOptions(String execution) {
 
-        return false;
-    }
 
-    private boolean needsNonStrictOrQuery(String execution) {
-        if (execution.contains("Consider using -non-strict to enable opportunistic matching")) {
-            return true;
-        }
-        return false;
-    }
 
-    private StringBuilder filebotExecution(FilebotExecution filebot) throws FilebotExecutorException {
-        try {
-            Process process = new ProcessBuilder("bash", "-c", filebot.getCommand()).redirectErrorStream(true)
-                    .start();
-            StringBuilder sbuilder = new StringBuilder();
-            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
-                log.debug("Filebot commandline: {}", line);
-                sbuilder.append(line);
-                sbuilder.append("\n");
-            });
-            executorService.submit(streamGobbler);
-            int status = process.waitFor();
-            if (status != 0) {
-                log.error("Todo mal");
-            } else {
-                log.error("Todo bien");
-            }
-            return sbuilder;
-        } catch (InterruptedException | IOException e) {
-            log.error("Exception on command line transcode", e);
-            Thread.currentThread().interrupt();
-            throw new FilebotExecutorException("Exception on command line transcode", e);
-        }
-    }
 
-    private String tryRegistered() {
-        log.info("Try register filebot");
-        try {
-            Process process = new ProcessBuilder("bash", "-c",
-                    "filebot --license " + filebotUtils.getFilebotPathData() + " license.psm")
-                            .redirectErrorStream(true)
-                            .start();
-            StringBuilder sbuilder = new StringBuilder();
-            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
-                log.debug("Filebot commandline: {}", line);
-                sbuilder.append(line);
-            });
-            executorService.submit(streamGobbler);
-            int status = process.waitFor();
-            if (status != 0) {
-                log.error("Todo mal");
-            } else {
-                log.error("Todo bien");
-            }
-            return sbuilder.toString();
-        } catch (InterruptedException | IOException e) {
-            log.error("Exception on command line transcode", e);
-            Thread.currentThread().interrupt();
-            throw new FilebotExecutorException("Exception on command line transcode", e);
-        }
-    }
-
-    private boolean isNotLicensed(String lines) {
-        log.info("Checking if is licensed");
-        if (lines.contains("License Error: UNREGISTERED")) {
-            // notificationService.send(SnsTopic.TELEGRAM_MESSAGE, "Filebot not registered.
-            // Please fix it", "filebot-execution");
-            return true;
-        }
-        return false;
-    }
+    
 
     private FilebotExecution save(FilebotExecution filebotExecution) {
         return filebotExecutionRepository.save(filebotExecution);
@@ -221,6 +167,7 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Override
     public void resolution(FilebotExecutionODTO filebotExecutionODTO) {
+        log.info("REsolution: {}", filebotExecutionODTO);
         // TODO Auto-generated method stub
 
     }

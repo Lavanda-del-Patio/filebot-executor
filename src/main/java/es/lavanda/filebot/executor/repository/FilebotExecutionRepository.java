@@ -4,6 +4,8 @@ import org.springframework.stereotype.Repository;
 
 import es.lavanda.filebot.executor.model.FilebotExecution;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 
@@ -12,5 +14,5 @@ public interface FilebotExecutionRepository extends PagingAndSortingRepository<F
 
     boolean existsByFolderPath(String folderPath);
     
-    FilebotExecution findByFolderPath(String folderPath);
+   Optional< FilebotExecution> findByFolderPath(String folderPath);
 }

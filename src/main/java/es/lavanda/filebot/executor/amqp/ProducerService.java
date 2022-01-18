@@ -1,10 +1,9 @@
-package es.lavanda.filebot.executor.service;
+package es.lavanda.filebot.executor.amqp;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
-import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
