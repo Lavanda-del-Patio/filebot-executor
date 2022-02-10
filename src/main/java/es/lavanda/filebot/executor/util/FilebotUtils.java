@@ -79,8 +79,8 @@ public class FilebotUtils {
         SHOWS_FORMAT(" 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}' "),
         OUTPUT_FORMAT(" --output \"FILEBOT_PATH_OUTPUT\" "),
         UNSORTED_FORMAT(" 'unsortedFormat=FILEBOT_PATH_INPUT/Unsorted/{fn}.{ext}' "),
-        STORE_REPORT(" 'storeReport=FILEBOT_PATH_DATA/.reports' "),
-        EXCLUDE_LIST(" 'excludeList=FILEBOT_PATH_DATA/.excludes' ");
+        STORE_REPORT(" --def 'storeReport=FILEBOT_PATH_DATA/.reports' "),
+        EXCLUDE_LIST(" --def 'excludeList=FILEBOT_PATH_DATA/.excludes' ");
 
         private final String text;
 
