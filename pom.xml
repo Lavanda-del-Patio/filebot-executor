@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-executor</artifactId>
-	<version>0.0.4</version>
+	<version>0.0.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-executor</name>
@@ -70,7 +70,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.14.2</version>
+			<version>1.14.3</version>
 		</dependency>
 		<!-- ============================= LOMBOK ================================= -->
 		<dependency>
