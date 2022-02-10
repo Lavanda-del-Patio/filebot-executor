@@ -78,9 +78,9 @@ public class FilebotUtils {
         MOVIES_FORMAT(" 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})' "),
         SHOWS_FORMAT(" 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}' "),
         OUTPUT_FORMAT(" --output \"FILEBOT_PATH_OUTPUT\" "),
-        UNSORTED_FORMAT(" 'unsortedFormat=/Unsorted/{fn}.{ext}' "),
+        UNSORTED_FORMAT(" 'unsortedFormat=FILEBOT_PATH_INPUT/Unsorted/{fn}.{ext}' "),
         STORE_REPORT(" 'storeReport=FILEBOT_PATH_DATA/.reports' "),
-        EXCLUDE_LIST(" 'excludeList=.excludes' ");
+        EXCLUDE_LIST(" 'excludeList=FILEBOT_PATH_DATA/.excludes' ");
 
         private final String text;
 
@@ -103,7 +103,7 @@ public class FilebotUtils {
     }
 
     private String getUnsortedFormat() {
-        return Constants.UNSORTED_FORMAT.toString().replace("FILEBOT_PATH_OUTPUT", FILEBOT_PATH_OUTPUT);
+        return Constants.UNSORTED_FORMAT.toString().replace("FILEBOT_PATH_INPUT", FILEBOT_PATH_OUTPUT);
     }
 
     private String getStoreReport() {
