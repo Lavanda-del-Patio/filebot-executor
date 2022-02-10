@@ -1,17 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>es.lavanda</groupId>
-	<artifactId>filebot-parser</artifactId>
-	<version>0.0.13</version>
+	<artifactId>filebot-executor</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>lavanda-filebot-parser</name>
+	<name>lavanda-filebot-executor</name>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.4.4</version>
+		<version>2.6.2</version>
 	</parent>
 
 	<properties>
@@ -21,24 +22,20 @@
 		<project.scm.id>github</project.scm.id>
 	</properties>
 
-	<distributionManagement>
-		<repository>
-			<id>github</id>
-			<name>GitHub luiscajl Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/luiscajl/lavanda-microservices</url>
-		</repository>
-	</distributionManagement>
-
 	<dependencies>
 		<dependency>
 			<groupId>es.lavanda</groupId>
 			<artifactId>lib-common</artifactId>
-			<version>0.0.40</version>
+			<version>0.0.59-SNAPSHOT</version>
 		</dependency>
 		<!-- ============================== SPRINGBOOT ============================ -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -49,6 +46,14 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
 		<!-- ================================== JAXB ============================== -->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>
@@ -58,7 +63,7 @@
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<version>1.4.18</version>
+			<version>1.4.19</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- ================================ JSOUP =============================== -->
@@ -71,7 +76,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.14</version>
+			<version>1.18.22</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -106,22 +111,19 @@
 				</executions>
 				<configuration>
 					<from>
-						<image>openjdk:11-slim</image>
+						<image>lavandadelpatio/java11-filebot:0.0.1</image>
 						<platforms>
 							<platform>
 								<architecture>amd64</architecture>
 								<os>linux</os>
 							</platform>
-							<platform>
-								<architecture>arm64</architecture>
-								<os>linux</os>
-							</platform>
 						</platforms>
 					</from>
 					<to>
-						<image>registry-1.docker.io/lavandadelpatio/filebot-parser</image>
+						<image>registry-1.docker.io/lavandadelpatio/filebot-executor</image>
 						<tags>
 							<tag>${project.version}</tag>
+							<tag>${project.version}-${TRIMMED_SHA}</tag>
 							<tag>latest</tag>
 						</tags>
 					</to>

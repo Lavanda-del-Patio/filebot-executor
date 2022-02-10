@@ -23,7 +23,7 @@
         <repository>
           <id>github</id>
           <name>GitHub Luiscajl Apache Maven Packages</name>
-          <url>https://maven.pkg.github.com/luiscajl/lavanda-microservices</url>
+          <url>https://maven.pkg.github.com/Lavanda-del-Patio/*</url>
           <releases>
             <enabled>true</enabled>
           </releases>

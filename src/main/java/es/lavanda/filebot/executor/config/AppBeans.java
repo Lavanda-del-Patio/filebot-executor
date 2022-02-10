@@ -1,6 +1,10 @@
-package es.lavanda.filebot.parser.config;
+package es.lavanda.filebot.executor.config;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
@@ -15,4 +19,8 @@ import org.springframework.cloud.aws.autoconfigure.context.ContextInstanceDataAu
 @EnableAutoConfiguration(exclude = { ContextInstanceDataAutoConfiguration.class })
 public class AppBeans {
 
+    @Bean
+    public ExecutorService executorServiceBean() {
+        return Executors.newSingleThreadExecutor();
+    }
 }

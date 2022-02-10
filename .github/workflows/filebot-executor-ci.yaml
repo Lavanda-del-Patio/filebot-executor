@@ -1,4 +1,4 @@
-name: Filebot parser - CI
+name: Filebot executor - CI
 on:
   schedule:
     - cron: '0 0 * * *' 

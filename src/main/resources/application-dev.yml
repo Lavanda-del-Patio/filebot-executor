@@ -1,11 +1,31 @@
 spring:
-    data: 
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: user
+        password: bitnami
+        listener:
+            simple:
+                retry:
+                    enabled: true
+                    initial-interval: 3s
+                    max-attempts: 1
+                    max-interval: 10s
+                    multiplier: 2
+    data:
         mongodb:
             authentication-database: admin
-            database: test 
-            host: localhost 
-            password:  example
-            port: 27017 
+            database: lavanda
+            host: localhost
+            password: example
+            port: 27017
             username: root
 filebot:
-    path: src/main/resources/filebot/            
+    path:
+        input: /Volumes/GoogleDrive-110414206331758876892/Mi unidad/Plex/Descargas/complete
+        # src/main/resources/filebot
+        output: /Volumes/GoogleDrive-110414206331758876892/Mi unidad/Plex/Descargas/ordered
+        data: /Volumes/GoogleDrive-110414206331758876892/Mi unidad/Plex/Descargas/data
+    test:
+        enabled: true    
+server.port: 0   
