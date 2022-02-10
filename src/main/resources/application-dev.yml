@@ -22,6 +22,10 @@ spring:
             username: root
 filebot:
     path:
-        input: src/main/resources/filebot
-        output: src/main/resources/filebot_output
-        data: src/main/resources/filebot_data
+        input: /Volumes/GoogleDrive-110414206331758876892/Mi unidad/Plex/Descargas/complete
+        # src/main/resources/filebot
+        output: /Volumes/GoogleDrive-110414206331758876892/Mi unidad/Plex/Descargas/ordered
+        data: /Volumes/GoogleDrive-110414206331758876892/Mi unidad/Plex/Descargas/data
+    test:
+        enabled: true    
+server.port: 0   

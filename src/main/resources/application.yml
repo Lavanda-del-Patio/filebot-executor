@@ -1,6 +1,6 @@
 spring:
   application:
-    name: lavanda-filebot-parser
+    name: lavanda-filebot-executor
   profiles:
     active: dev
 cloud:

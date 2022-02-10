@@ -2,6 +2,8 @@ package es.lavanda.filebot.executor.service.impl;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,8 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private final ExecutorService executorService;
 
+    private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d file");
+
     @Override
     public String execute(String command) {
         StringBuilder execution = filebotExecution(command);
@@ -29,18 +33,19 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         return execution.toString();
     }
 
-    private StringBuilder filebotExecution(String command) throws FilebotExecutorException {
+    private StringBuilder filebotExecution(String command) {
+        int status;
         try {
             Process process = new ProcessBuilder("bash", "-c", command).redirectErrorStream(true)
                     .start();
             StringBuilder sbuilder = new StringBuilder();
             StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
-                log.debug("Filebot commandline: {}", line);
+                log.info("Filebot commandline: {}", line);
                 sbuilder.append(line);
                 sbuilder.append("\n");
             });
             executorService.submit(streamGobbler);
-            int status = process.waitFor();
+            status = process.waitFor();
             if (status != 0) {
                 log.error("Todo mal");
             } else {
@@ -55,16 +60,27 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
     }
 
     private void isNotLicensed(String execution) {
-        log.info("Checking if is licensed");
+        log.debug("Checking if is licensed");
         if (execution.contains("License Error: UNREGISTERED")) {
             throw new FilebotAMCException(Type.REGISTER, execution);
         }
     }
 
     private void isNonStrictOrQuery(String execution) {
-        if (execution.contains("Consider using -non-strict to enable opportunistic matching")) {
+        if (execution.contains("Consider using -non-strict to enable opportunistic matching")
+                || execution.contains("No episode data found:")
+                || (notContainsProcessedFile(execution)
+                        && execution.contains("Finished without processing any files"))) {
             throw new FilebotAMCException(Type.STRICT_QUERY, execution);
         }
+    }
+
+    private boolean notContainsProcessedFile(String execution) {
+        Matcher matcherMovedContent = PATTERN_PROCESSED_FILE.matcher(execution);
+        if (!matcherMovedContent.find()) {
+            return true;
+        }
+        return false;
     }
 
     private void isChooseOptions(String execution) {

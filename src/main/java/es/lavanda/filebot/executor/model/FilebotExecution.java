@@ -26,7 +26,7 @@ public class FilebotExecution {
     @Field("file_name")
     private List<String> filesName;
 
-    @Field("new file_name")
+    @Field("new_file_name")
     private List<String> newFilesName;
 
     @Field("folder_path")
