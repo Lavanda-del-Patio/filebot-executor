@@ -16,6 +16,6 @@ public class FilebotAMCException extends RuntimeException {
     }
 
     public enum Type {
-        STRICT_QUERY, REGISTER, SELECTED_OPTIONS;
+        STRICT_QUERY, REGISTER, SELECTED_OPTIONS, FILE_EXIST;
     }
 }

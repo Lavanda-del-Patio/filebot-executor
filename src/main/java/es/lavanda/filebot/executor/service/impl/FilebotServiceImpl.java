@@ -57,6 +57,8 @@ public class FilebotServiceImpl implements FilebotService {
 
     private static final Pattern PATTERN_MOVED_CONTENT = Pattern.compile("(\\[.*\\]) from (\\[.*\\]) to (\\[.*\\])");
 
+    private static final Pattern PATTERN_FILE_EXIST = Pattern.compile("Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
+
     @Override
     public void resolution(FilebotExecutionODTO filebotExecutionODTO) {
         log.info("Resolution: {}", filebotExecutionODTO);
@@ -159,9 +161,33 @@ public class FilebotServiceImpl implements FilebotService {
                 log.info("Handling SELECTED_OPTIONS");
                 // selectOptions(filebotExecution, execution);
                 break;
+            case FILE_EXIST:
+                log.info("File exist");
+                fileExist(filebotExecution, execution);
+                break;
             default:
                 break;
         }
+    }
+
+    private void fileExist(FilebotExecution filebotExecution, String execution) {
+        log.info("FileExist {}", execution);
+        Matcher matcherMovedContent = PATTERN_FILE_EXIST.matcher(execution);
+        List<String> oldFilesName = new ArrayList<>();
+        List<String> newFilesname = new ArrayList<>();
+        while (matcherMovedContent.find()) {
+            String fromContent = matcherMovedContent.group(2);
+            String toContent = matcherMovedContent.group(3);
+            log.info("From Content {}", fromContent);
+            log.info("To Content {}", toContent);
+            oldFilesName.add(fromContent);
+            newFilesname.add(toContent);
+        }
+        filebotExecution.setNewFolderPath("newFolderPath");
+        filebotExecution.setFilesName(oldFilesName);
+        filebotExecution.setNewFilesName(newFilesname);
+        filebotExecution.setStatus(FilebotStatus.PROCESSED_EXISTED);
+        save(filebotExecution);
     }
 
     private void tryLicensed() {

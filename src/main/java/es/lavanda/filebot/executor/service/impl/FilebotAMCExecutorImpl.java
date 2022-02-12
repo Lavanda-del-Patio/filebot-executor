@@ -24,12 +24,15 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d file");
 
+    private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
+
     @Override
     public String execute(String command) {
         StringBuilder execution = filebotExecution(command);
         isNotLicensed(execution.toString());
         isNonStrictOrQuery(execution.toString());
         isChooseOptions(execution.toString());
+        isFileExists(execution.toString());
         return execution.toString();
     }
 
@@ -81,6 +84,13 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
             return true;
         }
         return false;
+    }
+
+    private void isFileExists(String execution) {
+        Matcher matcherMovedContent = PATTERN_FILE_EXISTS.matcher(execution);
+        if (matcherMovedContent.find()) {
+            throw new FilebotAMCException(Type.FILE_EXIST, execution);
+        }
     }
 
     private void isChooseOptions(String execution) {

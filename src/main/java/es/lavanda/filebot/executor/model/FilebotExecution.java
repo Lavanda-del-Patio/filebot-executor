@@ -51,7 +51,7 @@ public class FilebotExecution {
 
     public enum FilebotStatus {
 
-        UNPROCESSED, PROCESSING, PROCESSED, ERROR;
+        UNPROCESSED, PROCESSING, PROCESSED, PROCESSED_EXISTED, ERROR;
 
     }
 
