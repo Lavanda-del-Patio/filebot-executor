@@ -176,8 +176,8 @@ public class FilebotServiceImpl implements FilebotService {
         List<String> oldFilesName = new ArrayList<>();
         List<String> newFilesname = new ArrayList<>();
         while (matcherMovedContent.find()) {
-            String fromContent = matcherMovedContent.group(2);
-            String toContent = matcherMovedContent.group(3);
+            String fromContent = matcherMovedContent.group(1);
+            String toContent = matcherMovedContent.group(2);
             log.info("From Content {}", fromContent);
             log.info("To Content {}", toContent);
             oldFilesName.add(fromContent);
