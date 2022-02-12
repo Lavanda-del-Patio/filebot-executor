@@ -52,7 +52,8 @@ public class FilebotUtils {
                 getShowsFormat() +
                 getStoreReport() +
                 getUnsortedFormat() +
-                getExcludeList() + queryFilled + nonStrict + utLabel;
+                // getExcludeList() + 
+                queryFilled + nonStrict + utLabel;
     }
 
     private String getAction() {
