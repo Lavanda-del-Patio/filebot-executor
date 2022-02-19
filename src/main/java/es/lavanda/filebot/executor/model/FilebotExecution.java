@@ -9,6 +9,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -32,8 +33,11 @@ public class FilebotExecution {
     @Field("folder_path")
     private String folderPath;
 
-    @Field("new_folder_path")
-    private String newFolderPath;
+    @Field("parent_folder_path")
+    private String parentFolderPath;
+
+    @Field("new_parent_folder_path")
+    private String newParentFolderPath;
 
     @Field("command")
     private String command;
@@ -49,9 +53,12 @@ public class FilebotExecution {
     @Field("last_modified_at")
     private Date lastModifiedAt;
 
+    @Indexed(expireAfter = "P14D")
+    private String expireAfterFourteenDays;
+
     public enum FilebotStatus {
 
-        UNPROCESSED, PROCESSING, PROCESSED, PROCESSED_EXISTED, ERROR;
+        UNPROCESSED, PROCESSING, PROCESSED, PROCESSED_EXISTED, ERROR, FILES_NOT_FOUND;
 
     }
 
