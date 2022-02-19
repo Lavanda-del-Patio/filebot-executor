@@ -17,8 +17,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
     @Override
     public Page<FilebotExecution> getAllPageable(Pageable pageable) {
-        return filebotExecutionRepository.findAll(pageable);
+        return filebotExecutionRepository.findAllByOrderByLastModifiedAtDesc(pageable);
     }
 
-    
 }
