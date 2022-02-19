@@ -80,7 +80,7 @@ public class FilebotServiceImpl implements FilebotService {
             filebotExecutionRepository.findByFolderPath(path.toString()).ifPresentOrElse((filebotExecution) -> {
                 if (filebotExecution.getStatus().equals(FilebotStatus.PROCESSED)) {
                     // log.info("Path {} PROCESSED, reexecution", path.toString());
-                    reexcutionWithCommand(filebotExecution);
+                    // reexcutionWithCommand(filebotExecution);
                 } else if (filebotExecution.getStatus().equals(FilebotStatus.UNPROCESSED)) {
                     log.info("Path {} UNPROCESSED", path.toString());
                     executionComplete(filebotExecution);

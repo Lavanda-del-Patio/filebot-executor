@@ -6,13 +6,17 @@ import es.lavanda.filebot.executor.model.FilebotExecution;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
 
 @Repository
 public interface FilebotExecutionRepository extends PagingAndSortingRepository<FilebotExecution, String> {
 
     boolean existsByFolderPath(String folderPath);
-    
-   Optional< FilebotExecution> findByFolderPath(String folderPath);
+
+    Optional<FilebotExecution> findByFolderPath(String folderPath);
+
+    Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
+
 }
