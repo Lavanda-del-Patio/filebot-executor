@@ -24,12 +24,16 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d file");
 
+    private static final Pattern PATTERN_NO_PROCESSED_FILES = Pattern
+            .compile("Failed to identify or process any files");
+
     private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
 
     @Override
     public String execute(String command) {
         StringBuilder execution = filebotExecution(command);
         isNotLicensed(execution.toString());
+        // isNoProcessingFiles(execution.toString());
         isNonStrictOrQuery(execution.toString());
         isChooseOptions(execution.toString());
         isFileExists(execution.toString());
@@ -90,6 +94,13 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         Matcher matcherMovedContent = PATTERN_FILE_EXISTS.matcher(execution);
         if (matcherMovedContent.find()) {
             throw new FilebotAMCException(Type.FILE_EXIST, execution);
+        }
+    }
+
+    private void isNoProcessingFiles(String execution) {
+        Matcher matcherNoProcessedFiles = PATTERN_NO_PROCESSED_FILES.matcher(execution);
+        if (matcherNoProcessedFiles.find()) {
+            throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
         }
     }
 

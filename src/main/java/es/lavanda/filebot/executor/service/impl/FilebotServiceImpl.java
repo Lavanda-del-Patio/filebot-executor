@@ -55,9 +55,10 @@ public class FilebotServiceImpl implements FilebotService {
 
     private static final Pattern PATTERN_SELECT_CONTENT = Pattern.compile("Group:.*=> \\[(.*)\\]");
 
-    private static final Pattern PATTERN_MOVED_CONTENT = Pattern.compile("(\\[.*\\]) from (\\[.*\\]) to (\\[.*\\])");
+    private static final Pattern PATTERN_MOVED_CONTENT = Pattern.compile("\\[(.*)\\] from \\[(.*)\\] to \\[(.*)\\]");
 
-    private static final Pattern PATTERN_FILE_EXIST = Pattern.compile("Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
+    private static final Pattern PATTERN_FILE_EXIST = Pattern
+            .compile("Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
 
     @Override
     public void resolution(FilebotExecutionODTO filebotExecutionODTO) {
@@ -79,11 +80,12 @@ public class FilebotServiceImpl implements FilebotService {
             filebotExecutionRepository.findByFolderPath(path.toString()).ifPresentOrElse((filebotExecution) -> {
                 if (filebotExecution.getStatus().equals(FilebotStatus.PROCESSED)) {
                     // log.info("Path {} PROCESSED, reexecution", path.toString());
-                    // reexcutionWithCommand(filebotExecution);
+                    reexcutionWithCommand(filebotExecution);
                 } else if (filebotExecution.getStatus().equals(FilebotStatus.UNPROCESSED)) {
                     log.info("Path {} UNPROCESSED", path.toString());
                     executionComplete(filebotExecution);
-                } else if (filebotExecution.getStatus().equals(FilebotStatus.ERROR)) {
+                } else if (filebotExecution.getStatus().equals(FilebotStatus.ERROR)
+                        || filebotExecution.getStatus().equals(FilebotStatus.FILES_NOT_FOUND)) {
                     log.info("Path {} ERROR, reexecution", path.toString());
                     reexcutionWithCommand(filebotExecution);
                 }
@@ -165,9 +167,19 @@ public class FilebotServiceImpl implements FilebotService {
                 log.info("File exist");
                 fileExist(filebotExecution, execution);
                 break;
+            case FILES_NOT_FOUND:
+                log.info("Files not found");
+                filesNotFound(filebotExecution, execution);
+                break;
             default:
                 break;
         }
+    }
+
+    private void filesNotFound(FilebotExecution filebotExecution, String execution) {
+        log.info("filesNotFound {}", execution);
+        filebotExecution.setStatus(FilebotStatus.FILES_NOT_FOUND);
+        save(filebotExecution);
     }
 
     private void fileExist(FilebotExecution filebotExecution, String execution) {
@@ -180,10 +192,10 @@ public class FilebotServiceImpl implements FilebotService {
             String toContent = matcherMovedContent.group(2);
             log.info("From Content {}", fromContent);
             log.info("To Content {}", toContent);
-            oldFilesName.add(fromContent);
-            newFilesname.add(toContent);
+            oldFilesName.add(getFilename(fromContent));
+            newFilesname.add(getFilename(toContent));
         }
-        filebotExecution.setNewFolderPath("newFolderPath");
+        filebotExecution.setNewParentFolderPath(getFolderPathOfFiles(newFilesname));
         filebotExecution.setFilesName(oldFilesName);
         filebotExecution.setNewFilesName(newFilesname);
         filebotExecution.setStatus(FilebotStatus.PROCESSED_EXISTED);
@@ -191,7 +203,7 @@ public class FilebotServiceImpl implements FilebotService {
     }
 
     private void tryLicensed() {
-        log.info("Try Licenced");
+        log.info("Try to register license");
         try {
             // notificationService.sendNotification(SnsTopic.FILEBOT_LICENSE_ERROR,
             // "Filebot License Error",
@@ -255,18 +267,45 @@ public class FilebotServiceImpl implements FilebotService {
         Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution);
         List<String> oldFilesName = new ArrayList<>();
         List<String> newFilesname = new ArrayList<>();
+        String newParentFolderPath = "";
         while (matcherMovedContent.find()) {
             String fromContent = matcherMovedContent.group(2);
             String toContent = matcherMovedContent.group(3);
             log.info("From Content {}", fromContent);
             log.info("To Content {}", toContent);
-            oldFilesName.add(fromContent);
-            newFilesname.add(toContent);
+            oldFilesName.add(Path.of(fromContent).getFileName().toString());
+            newFilesname.add(Path.of(toContent).getFileName().toString());
+            newParentFolderPath = Path.of(toContent).getParent().getFileName().toString();
         }
-        filebotExecution.setNewFolderPath("newFolderPath");
+        filebotExecution.setParentFolderPath(getFolderPath(filebotExecution.getFolderPath()));
+        filebotExecution.setNewParentFolderPath(newParentFolderPath);
         filebotExecution.setFilesName(oldFilesName);
         filebotExecution.setNewFilesName(newFilesname);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
         save(filebotExecution);
+    }
+
+    private String getFolderPathOfFiles(List<String> newFilesname) {
+        for (String string : newFilesname) {
+            Path path = Paths.get(string);
+            return path.getParent().getFileName().toString();
+        }
+        return "";
+    }
+
+    private String getFolderPath(String folderPath) {
+        if (Objects.nonNull(folderPath)) {
+            Path path = Paths.get(folderPath);
+            return path.getFileName().toString();
+        }
+        return folderPath;
+    }
+
+    private String getFilename(String fromContent) {
+        if (Objects.nonNull(fromContent)) {
+            Path path = Paths.get(fromContent);
+            return path.getFileName().toString();
+        }
+        return fromContent;
     }
 }

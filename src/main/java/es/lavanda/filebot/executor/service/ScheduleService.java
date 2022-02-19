@@ -12,8 +12,9 @@ import lombok.RequiredArgsConstructor;
 public class ScheduleService {
 
 private final FilebotService filebotService;
-    
-    @Scheduled(fixedRate = 60000)
+    //     @Scheduled(cron = "0 0 * * * *")
+
+    @Scheduled(fixedDelay = 60000)
     public void executeSchedule() {
         filebotService.execute();
     }
