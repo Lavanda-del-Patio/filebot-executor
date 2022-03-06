@@ -111,7 +111,7 @@
 				</executions>
 				<configuration>
 					<from>
-						<image>lavandadelpatio/java11-filebot:0.0.6</image>
+						<image>rednoah/filebot</image>
 						<platforms>
 							<platform>
 								<architecture>amd64</architecture>
