@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-executor</artifactId>
-	<version>0.0.17</version>
+	<version>0.0.18-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-executor</name>
@@ -100,7 +100,7 @@
 			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
@@ -127,7 +127,7 @@
 							<tag>latest</tag>
 						</tags>
 					</to>
-					<container>
+					<!-- <container>
 						<environment>
 							<TZ>Europe/Madrid</TZ>
 							<PUID>1000</PUID>
@@ -136,7 +136,7 @@
 							<PGROUP>filebot</PGROUP>
 							<HOME>/home/filebot</HOME>
 						</environment>
-					</container>
+					</container> -->
 				</configuration>
 			</plugin>
 		</plugins>
