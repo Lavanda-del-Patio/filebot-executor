@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-executor</artifactId>
-	<version>0.0.16</version>
+	<version>0.0.17-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-executor</name>
@@ -130,8 +130,12 @@
 					<container>
 						<environment>
 							<TZ>Europe/Madrid</TZ>
+							<PUID>1000</PUID>
+							<PGID>1000</PGID>
+							<PGUSER>filebot</PGUSER>
+							<PGROUP>filebot</PGROUP>
+							<HOME>/home/filebot</HOME>
 						</environment>
-						<user>1000:1000</user>
 					</container>
 				</configuration>
 			</plugin>
