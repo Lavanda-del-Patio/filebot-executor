@@ -8,6 +8,7 @@ public enum FilebotConstants {
     ACTION_TEST(" --action test "),
     ACTION_MOVE(" --action move "),
     LANG_ES(" --lang es "),
+    LANG_EN(" --lang en "),
     ORDER_AIRDATE(" --order Airdate "),
     DEF(" --def "),
     LICENSE(" --license ");

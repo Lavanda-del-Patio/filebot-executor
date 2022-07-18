@@ -61,67 +61,67 @@ public class FilebotServiceImpl implements FilebotService {
             .compile("Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
 
     @Override
-    public void resolution(FilebotExecutionODTO filebotExecutionODTO) {
-        log.info("Resolution: {}", filebotExecutionODTO);
-        FilebotExecution filebotExecution = filebotExecutionRepository.findById(filebotExecutionODTO.getId())
-                .orElseThrow(() -> new FilebotExecutorException("Can not find filebotExecution"));
-        executionCompleteWithQuery(filebotExecution,
-                Optional.ofNullable(filebotExecutionODTO.getQuery())
-                        .orElse(filebotExecutionODTO.getSelectedPossibilitie()),
-                filebotExecutionODTO.getLabel(), filebotExecutionODTO.isForceStrict());
+    public FilebotExecution execute(FilebotExecution filebotExecution) {
+        filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
+        save(filebotExecution);
+        executionWithCommand(filebotExecution);
+        return filebotExecution;
     }
 
     @Override
-    public void execute() {
-        log.info("Executing Filebot Service");
-        List<Path> paths = getAllFilesFounded(filebotUtils.getFilebotPathInput());
-        paths.forEach(path -> {
-            // log.info(path.toString());
-            filebotExecutionRepository.findByFolderPath(path.toString()).ifPresentOrElse((filebotExecution) -> {
-                if (filebotExecution.getStatus().equals(FilebotStatus.PROCESSED)) {
-                    // log.info("Path {} PROCESSED, reexecution", path.toString());
-                    // reexcutionWithCommand(filebotExecution);
-                } else if (filebotExecution.getStatus().equals(FilebotStatus.UNPROCESSED)) {
-                    log.info("Path {} UNPROCESSED", path.toString());
-                    executionComplete(filebotExecution);
-                } else if (filebotExecution.getStatus().equals(FilebotStatus.ERROR)
-                        || filebotExecution.getStatus().equals(FilebotStatus.FILES_NOT_FOUND)) {
-                    log.info("Path {} ERROR, reexecution", path.toString());
-                    reexcutionWithCommand(filebotExecution);
-                }
-            }, () -> {
-                log.info("Path {} not processed. Starting new execution", path.toString());
-                // NO ESTA PRESENTE, SE TIENE QUE EJECUTAR
-                FilebotExecution filebotExecution = new FilebotExecution();
-                filebotExecution.setFolderPath(path.toString());
-                filebotExecution.setCommand(filebotUtils.getFilebotCommand(path, null, null, false));
-                filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
-                save(filebotExecution);
-                executionComplete(filebotExecution);
-            });
-        });
-    }
-
-    private void reexcutionWithCommand(FilebotExecution filebotExecution) {
-        log.info("On reexcutionWithCommand");
-        String execution = null;
-        try {
-            execution = filebotAMCExecutor
-                    .execute(filebotExecution.getCommand());
-            log.info("Result of Execution {}", execution);
-            completedFilebotExecution(filebotExecution, execution);
-        } catch (FilebotAMCException e) {
-            handleException(filebotExecution, e.getExecutionMessage(), e);
+    public void resolution(FilebotExecutionODTO filebotExecutionODTO) {
+        log.info("Resolution: {}", filebotExecutionODTO);
+        Optional<FilebotExecution> optFilebotExecution = filebotExecutionRepository
+                .findById(filebotExecutionODTO.getId());
+        if (optFilebotExecution.isPresent()) {
+            executionCompleteWithQuery(optFilebotExecution.get(),
+                    Optional.ofNullable(filebotExecutionODTO.getQuery())
+                            .orElse(filebotExecutionODTO.getSelectedPossibilitie()),
+                    filebotExecutionODTO.getLabel(), filebotExecutionODTO.isForceStrict());
+        } else {
+            log.error("FilebotExecution not found: {}", filebotExecutionODTO);
         }
     }
 
-    private void executionComplete(FilebotExecution filebotExecution) {
+    // @Override
+    // public void execute() {
+    // log.info("Executing Filebot Service");
+    // List<Path> paths = getAllFilesFounded(filebotUtils.getFilebotPathInput());
+    // paths.forEach(path -> {
+    // // log.info(path.toString());
+    // filebotExecutionRepository.findByFolderPath(path.toString()).ifPresentOrElse((filebotExecution)
+    // -> {
+    // if (filebotExecution.getStatus().equals(FilebotStatus.PROCESSED)) {
+    // // log.info("Path {} PROCESSED, reexecution", path.toString());
+    // // reexcutionWithCommand(filebotExecution);
+    // } else if (filebotExecution.getStatus().equals(FilebotStatus.UNPROCESSED)) {
+    // log.info("Path {} UNPROCESSED", path.toString());
+    // executionComplete(filebotExecution);
+    // } else if (filebotExecution.getStatus().equals(FilebotStatus.ERROR)
+    // || filebotExecution.getStatus().equals(FilebotStatus.FILES_NOT_FOUND)) {
+    // log.info("Path {} ERROR, reexecution", path.toString());
+    // reexcutionWithCommand(filebotExecution);
+    // }
+    // }, () -> {
+    // log.info("Path {} not processed. Starting new execution", path.toString());
+    // // NO ESTA PRESENTE, SE TIENE QUE EJECUTAR
+    // FilebotExecution filebotExecution = new FilebotExecution();
+    // filebotExecution.setFolderPath(path.toString());
+    // filebotExecution.setCommand(filebotUtils.getFilebotCommand(path, null, null,
+    // false));
+    // filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
+    // save(filebotExecution);
+    // executionComplete(filebotExecution);
+    // });
+    // });
+    // }
+
+    private void executionWithCommand(FilebotExecution filebotExecution) {
         log.info("On ExecutionComplete");
         String execution = null;
         try {
             execution = filebotAMCExecutor
-                    .execute(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getFolderPath()), null, null,
-                            false));
+                    .execute(filebotExecution.getCommand());
             log.info("Result of Execution {}", execution);
             completedFilebotExecution(filebotExecution, execution);
         } catch (FilebotAMCException e) {
@@ -134,12 +134,16 @@ public class FilebotServiceImpl implements FilebotService {
         log.info("On ExecutionComplete with Query");
         String execution = null;
         try {
-            String command = filebotUtils.getFilebotCommand(Path.of(filebotExecution.getFolderPath()), query,
-                    utLabel, forceStrict);
-            filebotExecution.setCommand(command);
+            if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+                filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of( filebotExecution.getPath()), query,
+                        utLabel, forceStrict, true));
+            } else {
+                filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of( filebotExecution.getPath()), query,
+                        utLabel, forceStrict, false));
+            }
             save(filebotExecution);
             execution = filebotAMCExecutor
-                    .execute(command);
+                    .execute(filebotExecution.getCommand());
             log.info("Result of Execution {}", execution);
             completedFilebotExecution(filebotExecution, execution);
         } catch (FilebotAMCException e) {
@@ -195,9 +199,9 @@ public class FilebotServiceImpl implements FilebotService {
             oldFilesName.add(getFilename(fromContent));
             newFilesname.add(getFilename(toContent));
         }
-        filebotExecution.setNewParentFolderPath(getFolderPathOfFiles(newFilesname));
-        filebotExecution.setFilesName(oldFilesName);
-        filebotExecution.setNewFilesName(newFilesname);
+        filebotExecution.setNewParentPath(getFolderPathOfFiles(newFilesname));
+        filebotExecution.setFiles(oldFilesName);
+        filebotExecution.setNewFiles(newFilesname);
         filebotExecution.setStatus(FilebotStatus.PROCESSED_EXISTED);
         save(filebotExecution);
     }
@@ -235,12 +239,12 @@ public class FilebotServiceImpl implements FilebotService {
                 groupContentList.add(splited);
             }
         }
-        filebotExecution.setFilesName(groupContentList);
+        filebotExecution.setFiles(groupContentList);
         FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
         filebotExecutionIDTO.setId(filebotExecution.getId());
-        filebotExecutionIDTO.setFiles(filebotExecution.getFilesName());
-        filebotExecutionIDTO.setPath(filebotExecution.getFolderPath());
-        producerService.sendFilebotExecution(filebotExecutionIDTO);
+        filebotExecutionIDTO.setFiles(filebotExecution.getFiles());
+        filebotExecutionIDTO.setPath(filebotExecution.getPath().toString());
+        producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
         filebotExecution.setStatus(FilebotStatus.PROCESSING);
         save(filebotExecution);
     }
@@ -267,7 +271,7 @@ public class FilebotServiceImpl implements FilebotService {
         Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution);
         List<String> oldFilesName = new ArrayList<>();
         List<String> newFilesname = new ArrayList<>();
-        String newParentFolderPath = "";
+        String newParentFolderPath = null;
         while (matcherMovedContent.find()) {
             String fromContent = matcherMovedContent.group(2);
             String toContent = matcherMovedContent.group(3);
@@ -277,10 +281,10 @@ public class FilebotServiceImpl implements FilebotService {
             newFilesname.add(Path.of(toContent).getFileName().toString());
             newParentFolderPath = Path.of(toContent).getParent().getFileName().toString();
         }
-        filebotExecution.setParentFolderPath(getFolderPath(filebotExecution.getFolderPath()));
-        filebotExecution.setNewParentFolderPath(newParentFolderPath);
-        filebotExecution.setFilesName(oldFilesName);
-        filebotExecution.setNewFilesName(newFilesname);
+        filebotExecution.setParentPath(getFolderPath(filebotExecution.getPath()));
+        filebotExecution.setNewParentPath(newParentFolderPath);
+        filebotExecution.setFiles(oldFilesName);
+        filebotExecution.setNewFiles(newFilesname);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
         save(filebotExecution);
     }
@@ -290,7 +294,7 @@ public class FilebotServiceImpl implements FilebotService {
             Path path = Paths.get(string);
             return path.getParent().getFileName().toString();
         }
-        return "";
+        return null;
     }
 
     private String getFolderPath(String folderPath) {
@@ -298,7 +302,7 @@ public class FilebotServiceImpl implements FilebotService {
             Path path = Paths.get(folderPath);
             return path.getFileName().toString();
         }
-        return folderPath;
+        return null;
     }
 
     private String getFilename(String fromContent) {
@@ -308,4 +312,5 @@ public class FilebotServiceImpl implements FilebotService {
         }
         return fromContent;
     }
+
 }

@@ -11,9 +11,12 @@ import org.springframework.amqp.core.QueueBuilder;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String QUEUE_MESSAGES = "filebot-executor-resolution";
-    public static final String QUEUE_MESSAGES_DLQ = "filebot-executor-resolution-dlq";
-    
+    public static final String QUEUE_MESSAGES = "filebot-telegram-resolution";
+    public static final String QUEUE_MESSAGES_DLQ = "filebot-telegram-resolution-dlq";
+
+    public static final String QUEUE_MESSAGES_EXECUTION = "filebot-execution";
+    public static final String QUEUE_MESSAGES_EXECUTION_DLQ = "filebot-execution-dlq";
+
     public static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
 
     @Bean
@@ -35,6 +38,22 @@ public class RabbitMQConfig {
     @Bean
     Queue deadLetterQueue() {
         return QueueBuilder.durable(QUEUE_MESSAGES_DLQ).build();
+    }
+
+    @Bean
+    Binding bindingMessagesExecution() {
+        return BindingBuilder.bind(messagesQueue()).to(messagesExchange()).with(QUEUE_MESSAGES_EXECUTION);
+    }
+
+    @Bean
+    Queue messagesQueueExecution() {
+        return QueueBuilder.durable(QUEUE_MESSAGES_EXECUTION).withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_MESSAGES_EXECUTION_DLQ).build();
+    }
+
+    @Bean
+    Queue deadLetterQueueExecution() {
+        return QueueBuilder.durable(QUEUE_MESSAGES_EXECUTION_DLQ).build();
     }
 
 }

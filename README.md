@@ -1,2 +1,2 @@
 # lavanda-filebot-parser
-Microservicio con un command line runner
+Microservicio que se ejecuta cada X y procesa todos los datos usando filebot

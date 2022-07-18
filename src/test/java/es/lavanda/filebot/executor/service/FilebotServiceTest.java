@@ -35,6 +35,6 @@ public class FilebotServiceTest {
     @Test
     @SneakyThrows
     public void test() {
-        filebotService.execute();
+        // filebotService.execute();
     }
 }

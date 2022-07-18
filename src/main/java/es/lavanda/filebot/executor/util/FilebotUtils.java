@@ -27,10 +27,11 @@ public class FilebotUtils {
                 getFilebotPathData().trim() + "/license.psm";
     }
 
-    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict) {
+    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english) {
         String queryFilled = "";
         String nonStrict = "";
         String utLabel = "";
+        String lang = FilebotConstants.LANG_ES.toString();
         if (Objects.nonNull(query)) {
             queryFilled = " --q \"" + query + "\" ";
         }
@@ -40,10 +41,13 @@ public class FilebotUtils {
         if (Objects.nonNull(label)) {
             utLabel = " --def \"ut_label=" + label.toLowerCase() + "\" ";
         }
+        if (english) {
+            lang = FilebotConstants.LANG_EN.toString();
+        }
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
                 getOutputFormat() +
                 getAction() +
-                FilebotConstants.LANG_ES.toString() +
+                lang +
                 FilebotConstants.ORDER_AIRDATE.toString() +
                 FilebotConstants.NO_XATTR.toString() +
                 "\"" + folderPath + "\"" +
@@ -52,7 +56,7 @@ public class FilebotUtils {
                 getShowsFormat() +
                 getStoreReport() +
                 getUnsortedFormat() +
-                // getExcludeList() + 
+                // getExcludeList() +
                 queryFilled + nonStrict + utLabel;
     }
 
@@ -77,7 +81,8 @@ public class FilebotUtils {
 
     private enum Constants {
         MOVIES_FORMAT(" 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})/{n} ({y})_{audioLanguages}_{vf}' "),
-        SHOWS_FORMAT(" 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}' "),
+        SHOWS_FORMAT(
+                " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}' "),
         OUTPUT_FORMAT(" --output \"FILEBOT_PATH_OUTPUT\" "),
         UNSORTED_FORMAT(" 'unsortedFormat=FILEBOT_PATH_INPUT/Unsorted/{fn}.{ext}' "),
         STORE_REPORT(" --def 'storeReport=FILEBOT_PATH_DATA/.reports' "),
