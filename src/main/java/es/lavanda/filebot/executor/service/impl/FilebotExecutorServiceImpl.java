@@ -45,7 +45,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
             throw new FilebotExecutorException("FilebotExecution already exists");
         }
         FilebotExecution filebotExecution = new FilebotExecution();
-        filebotExecution.setPath(qbittorrentModel.getPath().toString());
+        filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getPath().toString());
         filebotExecution.setCategory(qbittorrentModel.getCategory());
         if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en"))
             filebotExecution
