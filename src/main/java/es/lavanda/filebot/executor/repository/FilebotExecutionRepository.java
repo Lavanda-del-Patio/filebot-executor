@@ -13,9 +13,9 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 @Repository
 public interface FilebotExecutionRepository extends PagingAndSortingRepository<FilebotExecution, String> {
 
-    boolean existsByFolderPath(String folderPath);
+    boolean existsByPath(String folderPath);
 
-    Optional<FilebotExecution> findByFolderPath(String folderPath);
+    Optional<FilebotExecution> findByPath(String folderPath);
 
     Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
 

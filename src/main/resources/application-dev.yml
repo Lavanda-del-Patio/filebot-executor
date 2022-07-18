@@ -22,7 +22,7 @@ spring:
             username: root
 filebot:
     path:
-        input: src/main/resources/filebot
+        input: /Users/luiscarlosjimenezlopez/Documents/Github/LavandaDelPatio/filebot-executor/src/main/resources
         # src/main/resources/filebot
         output: src/main/resources/filebot_output
         data: src/main/resources/filebot_data

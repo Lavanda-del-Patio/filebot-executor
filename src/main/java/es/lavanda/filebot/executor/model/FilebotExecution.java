@@ -1,6 +1,8 @@
 package es.lavanda.filebot.executor.model;
 
+import java.io.Serializable;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,31 +21,52 @@ import lombok.ToString;
 @Data
 @Document("filebot_execution")
 @ToString
-public class FilebotExecution {
+public class FilebotExecution implements Serializable {
 
     @Id
     private String id;
 
-    @Field("file_name")
-    private List<String> filesName;
+    // @Field("file_name")
+    // private List<String> filesName = new ArrayList<>();
 
-    @Field("new_file_name")
-    private List<String> newFilesName;
+    // @Field("new_file_name")
+    // private List<String> newFilesName = new ArrayList<>();
 
-    @Field("folder_path")
-    private String folderPath;
+    // @Field("folder_path")
+    // private String folderPath;
 
-    @Field("parent_folder_path")
-    private String parentFolderPath;
+    // @Field("parent_folder_path")
+    // private String parentFolderPath;
 
-    @Field("new_parent_folder_path")
-    private String newParentFolderPath;
+    // @Field("new_parent_folder_path")
+    // private String newParentFolderPath;
+
+    @Field("files")
+    private List<String> files = new ArrayList<>();
+
+    @Field("new_files")
+    private List<String> newFiles = new ArrayList<>();
+
+    @Field("path")
+    private String path;
+
+    @Field("new_path")
+    private String newPath;
+
+    @Field("parent_path")
+    private String parentPath;
+
+    @Field("new_parent_path")
+    private String newParentPath;
+
+    @Field("category")
+    private String category;
 
     @Field("command")
     private String command;
 
     @Field("status")
-    private FilebotStatus status;
+    private FilebotStatus status = FilebotStatus.UNPROCESSED;
 
     @CreatedDate
     @Field("created_at")
