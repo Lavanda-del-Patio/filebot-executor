@@ -199,7 +199,7 @@ public class FilebotServiceImpl implements FilebotService {
             oldFilesName.add(getFilename(fromContent));
             newFilesname.add(getFilename(toContent));
         }
-        filebotExecution.setNewParentPath(getFolderPathOfFiles(newFilesname));
+        // filebotExecution.setNewParentPath(getFolderPathOfFiles(newFilesname));
         filebotExecution.setFiles(oldFilesName);
         filebotExecution.setNewFiles(newFilesname);
         filebotExecution.setStatus(FilebotStatus.PROCESSED_EXISTED);
@@ -281,8 +281,6 @@ public class FilebotServiceImpl implements FilebotService {
             newFilesname.add(Path.of(toContent).getFileName().toString());
             newParentFolderPath = Path.of(toContent).getParent().getFileName().toString();
         }
-        filebotExecution.setParentPath(getFolderPath(filebotExecution.getPath()));
-        filebotExecution.setNewParentPath(newParentFolderPath);
         filebotExecution.setFiles(oldFilesName);
         filebotExecution.setNewFiles(newFilesname);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);

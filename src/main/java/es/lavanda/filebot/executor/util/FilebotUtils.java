@@ -6,7 +6,10 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class FilebotUtils {
     private final String FILEBOT = "filebot";
 
@@ -28,6 +31,7 @@ public class FilebotUtils {
     }
 
     public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english) {
+        log.info("FOLDER PATH {}",folderPath);
         String queryFilled = "";
         String nonStrict = "";
         String utLabel = "";

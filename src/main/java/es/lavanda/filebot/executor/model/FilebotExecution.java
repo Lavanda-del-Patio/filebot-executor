@@ -26,21 +26,6 @@ public class FilebotExecution implements Serializable {
     @Id
     private String id;
 
-    // @Field("file_name")
-    // private List<String> filesName = new ArrayList<>();
-
-    // @Field("new_file_name")
-    // private List<String> newFilesName = new ArrayList<>();
-
-    // @Field("folder_path")
-    // private String folderPath;
-
-    // @Field("parent_folder_path")
-    // private String parentFolderPath;
-
-    // @Field("new_parent_folder_path")
-    // private String newParentFolderPath;
-
     @Field("files")
     private List<String> files = new ArrayList<>();
 
@@ -52,12 +37,6 @@ public class FilebotExecution implements Serializable {
 
     @Field("new_path")
     private String newPath;
-
-    @Field("parent_path")
-    private String parentPath;
-
-    @Field("new_parent_path")
-    private String newParentPath;
 
     @Field("category")
     private String category;
