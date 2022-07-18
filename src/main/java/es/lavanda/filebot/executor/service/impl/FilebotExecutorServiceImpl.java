@@ -1,5 +1,6 @@
 package es.lavanda.filebot.executor.service.impl;
 
+import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,10 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
         filebotExecution.setCategory(qbittorrentModel.getCategory());
         if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en"))
             filebotExecution
-                    .setCommand(filebotUtils.getFilebotCommand(qbittorrentModel.getPath(), null, null, false, true));
+                    .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false, true));
         else {
             filebotExecution
-                    .setCommand(filebotUtils.getFilebotCommand(qbittorrentModel.getPath(), null, null, false, false));
+                    .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false, false));
         }
         filebotExecutionRepository.save(filebotExecution);
         try {
