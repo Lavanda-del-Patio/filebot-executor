@@ -31,11 +31,12 @@ public class FilebotUtils {
     }
 
     public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english) {
-        log.info("FOLDER PATH {}",folderPath);
+        log.info("FOLDER PATH {}", folderPath);
         String queryFilled = "";
         String nonStrict = "";
         String utLabel = "";
         String lang = FilebotConstants.LANG_ES.toString();
+        String showsFormat = getShowsFormat();
         if (Objects.nonNull(query)) {
             queryFilled = " --q \"" + query + "\" ";
         }
@@ -47,6 +48,7 @@ public class FilebotUtils {
         }
         if (english) {
             lang = FilebotConstants.LANG_EN.toString();
+            showsFormat = getShowsEnFormat();
         }
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
                 getOutputFormat() +
@@ -57,7 +59,7 @@ public class FilebotUtils {
                 "\"" + folderPath + "\"" +
                 FilebotConstants.DEF.toString() +
                 getMoviesFormat() +
-                getShowsFormat() +
+                showsFormat +
                 getStoreReport() +
                 getUnsortedFormat() +
                 // getExcludeList() +
@@ -87,6 +89,8 @@ public class FilebotUtils {
         MOVIES_FORMAT(" 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})/{n} ({y})_{audioLanguages}_{vf}' "),
         SHOWS_FORMAT(
                 " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}' "),
+        SHOWS_EN_FORMAT(
+                " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series-EN/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}' "),
         OUTPUT_FORMAT(" --output \"FILEBOT_PATH_OUTPUT\" "),
         UNSORTED_FORMAT(" 'unsortedFormat=FILEBOT_PATH_INPUT/Unsorted/{fn}.{ext}' "),
         STORE_REPORT(" --def 'storeReport=FILEBOT_PATH_DATA/.reports' "),
@@ -110,6 +114,10 @@ public class FilebotUtils {
 
     private String getShowsFormat() {
         return Constants.SHOWS_FORMAT.toString().replace("FILEBOT_PATH_OUTPUT", FILEBOT_PATH_OUTPUT);
+    }
+
+    private String getShowsEnFormat() {
+        return Constants.SHOWS_EN_FORMAT.toString().replace("FILEBOT_PATH_OUTPUT", FILEBOT_PATH_OUTPUT);
     }
 
     private String getUnsortedFormat() {
