@@ -41,20 +41,20 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
     @Override
     public void createNewExecution(QbittorrentModel qbittorrentModel) {
-        log.info("Creating new Filebot Execution named {}", qbittorrentModel.getName());
-        if (filebotExecutionRepository.findByPath(qbittorrentModel.getPath().toString()).isPresent()) {
+        log.info("Creating new Filebot Execution about torrent id {} and name", qbittorrentModel.getId(),
+                qbittorrentModel.getName());
+        if (filebotExecutionRepository.findByPath(qbittorrentModel.getName().toString()).isPresent()) {
             throw new FilebotExecutorException("FilebotExecution already exists");
         }
         FilebotExecution filebotExecution = new FilebotExecution();
-        filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getPath().toString());
+        filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
         filebotExecution.setCategory(qbittorrentModel.getCategory());
-        if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en"))
-            filebotExecution
-                    .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false, true));
-        else {
-            filebotExecution
-                    .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false, false));
+        if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+            filebotExecution.setEnglish(true);
         }
+        filebotExecution
+                .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
+                        filebotExecution.isEnglish()));
         filebotExecutionRepository.save(filebotExecution);
         try {
             producerService.sendFilebotExecutionRecursive(filebotExecution);
