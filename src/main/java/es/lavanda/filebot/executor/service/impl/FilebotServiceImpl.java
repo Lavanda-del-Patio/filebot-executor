@@ -73,7 +73,8 @@ public class FilebotServiceImpl implements FilebotService {
         log.info("Resolution: {}", filebotExecutionODTO);
         Optional<FilebotExecution> optFilebotExecution = filebotExecutionRepository
                 .findById(filebotExecutionODTO.getId());
-        if (optFilebotExecution.isPresent()) {
+        if (optFilebotExecution.isPresent()
+                && Boolean.FALSE.equals(optFilebotExecution.get().getStatus() == FilebotStatus.PROCESSED)) {
             executionCompleteWithQuery(optFilebotExecution.get(),
                     Optional.ofNullable(filebotExecutionODTO.getQuery())
                             .orElse(filebotExecutionODTO.getSelectedPossibilitie()),
