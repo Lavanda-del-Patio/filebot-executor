@@ -134,13 +134,8 @@ public class FilebotServiceImpl implements FilebotService {
         log.info("On ExecutionComplete with Query");
         String execution = null;
         try {
-            if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
-                filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of( filebotExecution.getPath()), query,
-                        utLabel, forceStrict, true));
-            } else {
-                filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of( filebotExecution.getPath()), query,
-                        utLabel, forceStrict, false));
-            }
+            filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), query,
+                    utLabel, forceStrict, filebotExecution.isEnglish()));
             save(filebotExecution);
             execution = filebotAMCExecutor
                     .execute(filebotExecution.getCommand());

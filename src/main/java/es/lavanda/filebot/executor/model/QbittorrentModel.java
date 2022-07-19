@@ -6,10 +6,11 @@ import lombok.Data;
 
 @Data
 public class QbittorrentModel {
-    private String name;
+
+    private String id;
 
     private String category;
 
-    private Path path;
+    private Path name;
 
 }

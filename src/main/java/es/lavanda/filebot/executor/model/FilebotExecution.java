@@ -44,6 +44,9 @@ public class FilebotExecution implements Serializable {
     @Field("command")
     private String command;
 
+    @Field("english")
+    private boolean english;
+
     @Field("status")
     private FilebotStatus status = FilebotStatus.UNPROCESSED;
 
