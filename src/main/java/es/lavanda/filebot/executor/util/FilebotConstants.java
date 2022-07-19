@@ -6,7 +6,7 @@ public enum FilebotConstants {
     NO_XATTR(" -no-xattr "),
     NON_STRICT(" -non-strict "),
     ACTION_TEST(" --action test "),
-    ACTION_MOVE(" --action move "),
+    ACTION_MOVE(" --action copy "),
     LANG_ES(" --lang es "),
     LANG_EN(" --lang en "),
     ORDER_AIRDATE(" --order Airdate "),
