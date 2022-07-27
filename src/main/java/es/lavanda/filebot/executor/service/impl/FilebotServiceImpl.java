@@ -279,6 +279,7 @@ public class FilebotServiceImpl implements FilebotService {
         }
         filebotExecution.setFiles(oldFilesName);
         filebotExecution.setNewFiles(newFilesname);
+        filebotExecution.setNewPath(newParentFolderPath);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
         save(filebotExecution);
     }

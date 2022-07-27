@@ -22,9 +22,9 @@ spring:
             username: root
 filebot:
     path:
-        input: /Users/luiscarlosjimenezlopez/Documents/Github/LavandaDelPatio/filebot-executor/src/main/resources
+        input: /Users/luiscarlos/Documents/Github/LavandaDelPatio/filebot-executor/src/main/resources/filebot
         # src/main/resources/filebot
-        output: src/main/resources/filebot_output
+        output: /Users/luiscarlos/Documents/Github/LavandaDelPatio/filebot-executor/src/main/resources/filebot_output
         data: src/main/resources/filebot_data
     test:
         enabled: true    
