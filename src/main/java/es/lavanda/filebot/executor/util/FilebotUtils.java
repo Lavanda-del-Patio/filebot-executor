@@ -53,6 +53,7 @@ public class FilebotUtils {
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
                 getOutputFormat() +
                 getAction() +
+                getDatabase() +
                 lang +
                 FilebotConstants.ORDER_AIRDATE.toString() +
                 FilebotConstants.NO_XATTR.toString() +
@@ -106,6 +107,10 @@ public class FilebotUtils {
         public String toString() {
             return text;
         }
+    }
+
+    private String getDatabase() {
+        return FilebotConstants.DATABASE.toString();
     }
 
     private String getMoviesFormat() {
