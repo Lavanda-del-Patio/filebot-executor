@@ -10,6 +10,10 @@ public interface FilebotExecutorService {
 
     Page<FilebotExecution> getAllPageable(Pageable pageable);
 
-    void createNewExecution(QbittorrentModel qbittorrentModel);
+    FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel);
+
+    FilebotExecution reExecution(String id);
+
+    void delete(String id);
 
 }
