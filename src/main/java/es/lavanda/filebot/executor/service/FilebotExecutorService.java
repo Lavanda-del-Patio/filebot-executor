@@ -16,4 +16,7 @@ public interface FilebotExecutorService {
 
     void delete(String id);
 
+    FilebotExecution getById(String id);
+
+
 }

@@ -92,4 +92,11 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
                         "FilebotExecution not found with the id " + id));
         filebotExecutionRepository.delete(filebotExecution);
     }
+
+    @Override
+    public FilebotExecution getById(String id) {
+        return filebotExecutionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "FilebotExecution not found with the id " + id));
+    }
 }
