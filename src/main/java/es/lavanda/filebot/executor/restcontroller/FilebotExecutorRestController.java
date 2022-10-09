@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(allowedHeaders = "*", origins = { "http://localhost:4200", "https://lavandadelpatio.es",
         "https://pre.lavandadelpatio.es" }, allowCredentials = "true", exposedHeaders = "*", methods = {
                 RequestMethod.OPTIONS, RequestMethod.DELETE, RequestMethod.GET, RequestMethod.PATCH, RequestMethod.POST,
-                RequestMethod.HEAD,
                 RequestMethod.PUT }, originPatterns = {})
 @RequestMapping("/filebot-executor")
 @Slf4j
@@ -40,7 +39,6 @@ public class FilebotExecutorRestController {
     public ResponseEntity<Page<FilebotExecution>> getAll(Pageable pageable) {
         return ResponseEntity.ok(filebotExecutorService.getAllPageable(pageable));
     }
-
     @GetMapping("/{id}")
     public ResponseEntity<FilebotExecution> getById(@PathVariable String id) {
         return ResponseEntity.ok(filebotExecutorService.getById(id));
