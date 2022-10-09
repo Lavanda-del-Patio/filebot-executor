@@ -6,8 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,10 +41,22 @@ public class FilebotExecutorRestController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
+    public ResponseEntity<FilebotExecution> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
         log.info("Reciveid qbittorrentModel: {}", qbittorrentModel);
-        filebotExecutorService.createNewExecution(qbittorrentModel);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(filebotExecutorService.createNewExecution(qbittorrentModel));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FilebotExecution> reExecution(@PathVariable String id) {
+        log.info("Reciveid reExectution for ID: {}", id);
+        return ResponseEntity.ok(filebotExecutorService.reExecution(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        log.info("Reciveid delete for ID: {}", id);
+        filebotExecutorService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
