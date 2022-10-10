@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-executor</artifactId>
-	<version>0.0.39</version>
+	<version>0.0.40-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-executor</name>
@@ -21,7 +21,7 @@
 		<maven.compiler.target>11</maven.compiler.target>
 		<project.scm.id>github</project.scm.id>
 	</properties>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>es.lavanda</groupId>
@@ -53,6 +53,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<!-- ================================== JAXB ============================== -->
 		<dependency>
