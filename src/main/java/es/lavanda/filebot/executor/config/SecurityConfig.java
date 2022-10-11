@@ -17,11 +17,11 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                .antMatchers("/actuator/**")
-                .permitAll().anyRequest().authenticated();
-        http.cors();
+        // http
+        //         .authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+        //         .antMatchers("/actuator/**")
+        //         .permitAll().anyRequest().authenticated();
+        http.cors().disable();
         return http.build();
     }
 
