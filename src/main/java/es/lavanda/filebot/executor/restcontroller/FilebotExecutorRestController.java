@@ -1,5 +1,7 @@
 package es.lavanda.filebot.executor.restcontroller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.lavanda.filebot.executor.model.FilebotExecution;
@@ -45,6 +48,11 @@ public class FilebotExecutorRestController {
         return ResponseEntity.ok(filebotExecutorService.getById(id));
     }
 
+    @GetMapping("/files")
+    public ResponseEntity<List<String>> getListOfPaths() {
+        return ResponseEntity.ok(filebotExecutorService.getAllFiles());
+    }
+
     @PostMapping
     public ResponseEntity<FilebotExecution> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
         log.info("Reciveid qbittorrentModel: {}", qbittorrentModel);
@@ -52,9 +60,10 @@ public class FilebotExecutorRestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FilebotExecution> reExecution(@PathVariable String id) {
-        log.info("Reciveid reExectution for ID: {}", id);
-        return ResponseEntity.ok(filebotExecutorService.reExecution(id));
+    public ResponseEntity<FilebotExecution> editExecution(@PathVariable String id, @RequestParam boolean force,
+            @RequestBody FilebotExecution filebotExecution) {
+        log.info("Reciveid edit for ID: {}", id);
+        return ResponseEntity.ok(filebotExecutorService.editExecution(id, filebotExecution, force));
     }
 
     @DeleteMapping("/{id}")

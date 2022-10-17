@@ -1,5 +1,7 @@
 package es.lavanda.filebot.executor.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,11 +14,12 @@ public interface FilebotExecutorService {
 
     FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel);
 
-    FilebotExecution reExecution(String id);
-
     void delete(String id);
 
     FilebotExecution getById(String id);
 
+    FilebotExecution editExecution(String id, FilebotExecution filebotExecution, boolean force);
+
+    List<String> getAllFiles();
 
 }
