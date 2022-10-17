@@ -20,6 +20,6 @@ public class AppBeans {
 
     @Bean
     public ExecutorService executorServiceBean() {
-        return Executors.newSingleThreadExecutor();
+        return Executors.newFixedThreadPool(4);
     }
 }
