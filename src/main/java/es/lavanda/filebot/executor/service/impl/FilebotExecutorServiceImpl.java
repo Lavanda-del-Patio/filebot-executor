@@ -2,6 +2,7 @@ package es.lavanda.filebot.executor.service.impl;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -95,21 +96,33 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "FilebotExecution not found with the id " + id));
         filebotExecutionToEdit.setCategory(filebotExecution.getCategory());
-        filebotExecutionToEdit.setPath(filebotExecution.getPath());
-        filebotExecutionToEdit.setCommand(filebotExecution.getCommand());
-        filebotExecutionToEdit.setEnglish(filebotExecution.isEnglish());
+        if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+            filebotExecutionToEdit.setEnglish(true);
+        }
+        filebotExecutionToEdit.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
+        if (Objects.nonNull(filebotExecution.getCommand())) {
+            filebotExecutionToEdit.setCommand(filebotExecution.getCommand());
+        } else {
+            filebotExecutionToEdit
+                    .setCommand(
+                            filebotUtils.getFilebotCommand(Path.of(filebotExecutionToEdit.getPath()), null, null, false,
+                                    filebotExecution.isEnglish()));
+        }
+        // filebotExecutionToEdit.setEnglish(filebotExecution.isEnglish());
         if (force) {
-            filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
-            filebotExecution = filebotExecutionRepository.save(filebotExecution);
+            filebotExecutionToEdit.setStatus(FilebotStatus.UNPROCESSED);
+            filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
             try {
-                producerService.sendFilebotExecutionRecursive(filebotExecution);
+                producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
             } catch (Exception e) {
                 log.error("Error with the execution {}", filebotExecution.getId(), e);
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                         "Error with the execution " + filebotExecution.getId());
             }
+        } else {
+            filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
         }
-        return filebotExecution;
+        return filebotExecutionToEdit;
     }
 
     private void checkSameId(FilebotExecution filebotExecution, String id) {
