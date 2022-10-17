@@ -1,6 +1,7 @@
 package es.lavanda.filebot.executor.service.impl;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
@@ -17,6 +18,7 @@ import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
+import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
@@ -37,6 +39,9 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
     @Autowired
     private ProducerService producerService;
+
+    @Autowired
+    private FileService fileServiceImpl;
 
     @Override
     public Page<FilebotExecution> getAllPageable(Pageable pageable) {
@@ -69,23 +74,6 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     }
 
     @Override
-    public FilebotExecution reExecution(String id) {
-        FilebotExecution filebotExecution = filebotExecutionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "FilebotExecution not found with the id " + id));
-        filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
-        filebotExecution = filebotExecutionRepository.save(filebotExecution);
-        try {
-            producerService.sendFilebotExecutionRecursive(filebotExecution);
-        } catch (Exception e) {
-            log.error("Error with the execution {}", filebotExecution.getId(), e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error with the execution " + filebotExecution.getId());
-        }
-        return filebotExecution;
-    }
-
-    @Override
     public void delete(String id) {
         FilebotExecution filebotExecution = filebotExecutionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -98,5 +86,42 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
         return filebotExecutionRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "FilebotExecution not found with the id " + id));
+    }
+
+    @Override
+    public FilebotExecution editExecution(String id, FilebotExecution filebotExecution, boolean force) {
+        checkSameId(filebotExecution, id);
+        FilebotExecution filebotExecutionToEdit = filebotExecutionRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "FilebotExecution not found with the id " + id));
+        filebotExecutionToEdit.setCategory(filebotExecution.getCategory());
+        filebotExecutionToEdit.setPath(filebotExecution.getPath());
+        filebotExecutionToEdit.setCommand(filebotExecution.getCommand());
+        filebotExecutionToEdit.setEnglish(filebotExecution.isEnglish());
+        if (force) {
+            filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
+            filebotExecution = filebotExecutionRepository.save(filebotExecution);
+            try {
+                producerService.sendFilebotExecutionRecursive(filebotExecution);
+            } catch (Exception e) {
+                log.error("Error with the execution {}", filebotExecution.getId(), e);
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Error with the execution " + filebotExecution.getId());
+            }
+        }
+        return filebotExecution;
+    }
+
+    private void checkSameId(FilebotExecution filebotExecution, String id) {
+        if (!filebotExecution.getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "The id of the filebotExecution to edit is not the same as the id of the filebotExecution to edit");
+        }
+    }
+
+    @Override
+    public List<String> getAllFiles() {
+        return fileServiceImpl
+                .ls(filebotUtils.getFilebotPathInput());
     }
 }
