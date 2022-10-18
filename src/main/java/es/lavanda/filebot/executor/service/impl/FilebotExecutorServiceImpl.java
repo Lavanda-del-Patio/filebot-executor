@@ -29,112 +29,103 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
-    @Autowired
-    private FilebotExecutionRepository filebotExecutionRepository;
+  @Autowired
+  private FilebotExecutionRepository filebotExecutionRepository;
 
-    @Autowired
-    private FilebotService filebotService;
+  @Autowired
+  private FilebotService filebotService;
 
-    @Autowired
-    private FilebotUtils filebotUtils;
+  @Autowired
+  private FilebotUtils filebotUtils;
 
-    @Autowired
-    private ProducerService producerService;
+  @Autowired
+  private ProducerService producerService;
 
-    @Autowired
-    private FileService fileServiceImpl;
+  @Autowired
+  private FileService fileServiceImpl;
 
-    @Override
-    public Page<FilebotExecution> getAllPageable(Pageable pageable) {
-        return filebotExecutionRepository.findAllByOrderByLastModifiedAtDesc(pageable);
+  @Override
+  public Page<FilebotExecution> getAllPageable(Pageable pageable) {
+    return filebotExecutionRepository.findAllByOrderByLastModifiedAtDesc(pageable);
+  }
+
+  @Override
+  public FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel) {
+    log.info("Creating new Filebot Execution about torrent id {} and name", qbittorrentModel.getId(),
+        qbittorrentModel.getName());
+    if (filebotExecutionRepository.findByPath(qbittorrentModel.getName().toString()).isPresent()) {
+      throw new FilebotExecutorException("FilebotExecution already exists");
+    }
+    FilebotExecution filebotExecution = new FilebotExecution();
+    filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
+    filebotExecution.setCategory(qbittorrentModel.getCategory());
+    if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+      filebotExecution.setEnglish(true);
+    }
+    filebotExecution
+        .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
+            filebotExecution.isEnglish()));
+    filebotExecution = filebotExecutionRepository.save(filebotExecution);
+    try {
+      producerService.sendFilebotExecutionRecursive(filebotExecution);
+    } catch (Exception e) {
+      log.error("Error with the execution {}", qbittorrentModel.getName(), e);
+    }
+    return filebotExecution;
+  }
+
+  @Override
+  public void delete(String id) {
+    FilebotExecution filebotExecution = filebotExecutionRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "FilebotExecution not found with the id " + id));
+    filebotExecutionRepository.delete(filebotExecution);
+  }
+
+  @Override
+  public FilebotExecution getById(String id) {
+    return filebotExecutionRepository.findById(id)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "FilebotExecution not found with the id " + id));
+  }
+
+  @Override
+  public FilebotExecution editExecution(String id, FilebotExecution filebotExecution) {
+    checkSameId(filebotExecution, id);
+    FilebotExecution filebotExecutionToEdit = filebotExecutionRepository.findById(id).map(fe -> {
+      fe.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
+      fe.setCategory(filebotExecution.getCategory());
+      fe.setEnglish(fe.getCategory().equalsIgnoreCase("tv-sonarr-en") ? true : false);
+      fe.setCommand(Objects.nonNull(filebotExecution.getCommand()) ? filebotExecution.getCommand()
+          : filebotUtils.getFilebotCommand(Path.of(fe.getPath()), null,
+              null, false, fe.isEnglish()));
+      fe.setStatus(FilebotStatus.UNPROCESSED);
+      return fe;
+    }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        "FilebotExecution not found with the id " + id));
+    filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
+    try {
+      producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
+    } catch (
+    Exception e) {
+      log.error("Error with the execution {}", filebotExecution.getId(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Error with the execution " + filebotExecution.getId());
     }
 
-    @Override
-    public FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel) {
-        log.info("Creating new Filebot Execution about torrent id {} and name", qbittorrentModel.getId(),
-                qbittorrentModel.getName());
-        if (filebotExecutionRepository.findByPath(qbittorrentModel.getName().toString()).isPresent()) {
-            throw new FilebotExecutorException("FilebotExecution already exists");
-        }
-        FilebotExecution filebotExecution = new FilebotExecution();
-        filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
-        filebotExecution.setCategory(qbittorrentModel.getCategory());
-        if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
-            filebotExecution.setEnglish(true);
-        }
-        filebotExecution
-                .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
-                        filebotExecution.isEnglish()));
-        filebotExecution = filebotExecutionRepository.save(filebotExecution);
-        try {
-            producerService.sendFilebotExecutionRecursive(filebotExecution);
-        } catch (Exception e) {
-            log.error("Error with the execution {}", qbittorrentModel.getName(), e);
-        }
-        return filebotExecution;
-    }
+    return filebotExecutionToEdit;
+  }
 
-    @Override
-    public void delete(String id) {
-        FilebotExecution filebotExecution = filebotExecutionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "FilebotExecution not found with the id " + id));
-        filebotExecutionRepository.delete(filebotExecution);
+  private void checkSameId(FilebotExecution filebotExecution, String id) {
+    if (!filebotExecution.getId().equals(id)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "The id of the filebotExecution to edit is not the same as the id of the filebotExecution to edit");
     }
+  }
 
-    @Override
-    public FilebotExecution getById(String id) {
-        return filebotExecutionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "FilebotExecution not found with the id " + id));
-    }
-
-    @Override
-    public FilebotExecution editExecution(String id, FilebotExecution filebotExecution, boolean force) {
-        checkSameId(filebotExecution, id);
-        FilebotExecution filebotExecutionToEdit = filebotExecutionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "FilebotExecution not found with the id " + id));
-        filebotExecutionToEdit.setCategory(filebotExecution.getCategory());
-        if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
-            filebotExecutionToEdit.setEnglish(true);
-        }
-        filebotExecutionToEdit.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
-        if (Objects.nonNull(filebotExecution.getCommand())) {
-            filebotExecutionToEdit.setCommand(filebotExecution.getCommand());
-        } else {
-            filebotExecutionToEdit
-                    .setCommand(
-                            filebotUtils.getFilebotCommand(Path.of(filebotExecutionToEdit.getPath()), null, null, false,
-                                    filebotExecution.isEnglish()));
-        }
-        // filebotExecutionToEdit.setEnglish(filebotExecution.isEnglish());
-        if (force) {
-            filebotExecutionToEdit.setStatus(FilebotStatus.UNPROCESSED);
-            filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
-            try {
-                producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
-            } catch (Exception e) {
-                log.error("Error with the execution {}", filebotExecution.getId(), e);
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-                        "Error with the execution " + filebotExecution.getId());
-            }
-        } else {
-            filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
-        }
-        return filebotExecutionToEdit;
-    }
-
-    private void checkSameId(FilebotExecution filebotExecution, String id) {
-        if (!filebotExecution.getId().equals(id)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "The id of the filebotExecution to edit is not the same as the id of the filebotExecution to edit");
-        }
-    }
-
-    @Override
-    public List<String> getAllFiles() {
-        return fileServiceImpl
-                .ls(filebotUtils.getFilebotPathInput());
-    }
+  @Override
+  public List<String> getAllFiles() {
+    return fileServiceImpl
+        .ls(filebotUtils.getFilebotPathInput());
+  }
 }

@@ -28,15 +28,15 @@ public class FileServiceImpl implements FileService {
             Process process = new ProcessBuilder("bash", "-c", "ls " + path).redirectErrorStream(true)
                     .start();
             StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
-                log.info("BASH commandline: {}", line);
+                // log.info("BASH commandline: {}", line);
                 lsResult.add(line);
             });
             executorService.submit(streamGobbler);
             status = process.waitFor();
             if (status != 0) {
-                log.error("Todo mal");
+                log.error("LS command result on fail");
             } else {
-                log.info("Todo bien");
+                log.info("LS command result on success");
             }
             return lsResult;
         } catch (InterruptedException | IOException e) {

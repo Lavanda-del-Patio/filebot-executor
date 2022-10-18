@@ -16,6 +16,8 @@ public class ProducerService {
 
     private final RabbitTemplate rabbitTemplate;
 
+    private static final String FILEBOT_EXECUTION_QUEUE = "filebot-execution";
+
     public void sendFilebotExecutionToTelegram(FilebotExecutionIDTO filebot) {
         try {
             log.info("Sending message to queue {}", "filebot-telegram");
@@ -27,17 +29,15 @@ public class ProducerService {
         }
     }
 
-
     public void sendFilebotExecutionRecursive(FilebotExecution filebot) {
         try {
-            log.info("Sending message to queue {}", "filebot-execution");
+            log.info("Sending message to queue {} the content {} ", FILEBOT_EXECUTION_QUEUE, filebot);
             rabbitTemplate.convertAndSend("filebot-execution", filebot);
-            log.info("Sended message to queue");
+            log.info("Sended message to queue {}", FILEBOT_EXECUTION_QUEUE);
         } catch (Exception e) {
-            log.error("Failed send message to queue {}", "filebot-execution", e);
+            log.error("Failed send message to queue {}", FILEBOT_EXECUTION_QUEUE, e);
             throw new FilebotExecutorException("Failed send message to queue", e);
         }
     }
-
 
 }
