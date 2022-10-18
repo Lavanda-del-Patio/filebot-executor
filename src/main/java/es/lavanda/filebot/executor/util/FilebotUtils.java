@@ -35,7 +35,7 @@ public class FilebotUtils {
         String queryFilled = "";
         String nonStrict = "";
         String utLabel = "";
-        String lang = FilebotConstants.LANG_ES.toString();
+        String lang = FilebotConstants.LANG_EN.toString();
         String showsFormat = getShowsFormat();
         if (Objects.nonNull(query)) {
             queryFilled = " --q \"" + query + "\" ";
@@ -47,7 +47,6 @@ public class FilebotUtils {
             utLabel = " --def \"ut_label=" + label.toLowerCase() + "\" ";
         }
         if (english) {
-            lang = FilebotConstants.LANG_EN.toString();
             showsFormat = getShowsEnFormat();
         }
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
