@@ -18,7 +18,7 @@ public interface FilebotExecutorService {
 
     FilebotExecution getById(String id);
 
-    FilebotExecution editExecution(String id, FilebotExecution filebotExecution, boolean force);
+    FilebotExecution editExecution(String id, FilebotExecution filebotExecution);
 
     List<String> getAllFiles();
 

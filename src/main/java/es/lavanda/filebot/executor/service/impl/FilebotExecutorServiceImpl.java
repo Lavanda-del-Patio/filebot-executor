@@ -90,38 +90,29 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   }
 
   @Override
-  public FilebotExecution editExecution(String id, FilebotExecution filebotExecution, boolean force) {
+  public FilebotExecution editExecution(String id, FilebotExecution filebotExecution) {
     checkSameId(filebotExecution, id);
-    FilebotExecution filebotExecutionToEdit = filebotExecutionRepository.findById(id)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "FilebotExecution not found with the id " + id));
-    filebotExecutionToEdit.setCategory(filebotExecution.getCategory());
-    if (filebotExecutionToEdit.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
-      filebotExecutionToEdit.setEnglish(true);
+    FilebotExecution filebotExecutionToEdit = filebotExecutionRepository.findById(id).map(fe -> {
+      fe.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
+      fe.setCategory(filebotExecution.getCategory());
+      fe.setEnglish(fe.getCategory().equalsIgnoreCase("tv-sonarr-en") ? true : false);
+      fe.setCommand(Objects.nonNull(filebotExecution.getCommand()) ? filebotExecution.getCommand()
+          : filebotUtils.getFilebotCommand(Path.of(fe.getPath()), null,
+              null, false, fe.isEnglish()));
+      fe.setStatus(FilebotStatus.UNPROCESSED);
+      return fe;
+    }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+        "FilebotExecution not found with the id " + id));
+    filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
+    try {
+      producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
+    } catch (
+    Exception e) {
+      log.error("Error with the execution {}", filebotExecution.getId(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Error with the execution " + filebotExecution.getId());
     }
-    filebotExecutionToEdit.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
-    if (Objects.nonNull(filebotExecution.getCommand())) {
-      filebotExecutionToEdit.setCommand(filebotExecution.getCommand());
-    } else {
-      filebotExecutionToEdit
-          .setCommand(
-              filebotUtils.getFilebotCommand(Path.of(filebotExecutionToEdit.getPath()), null, null, false,
-                  filebotExecutionToEdit.isEnglish()));
-    }
-    // filebotExecutionToEdit.setEnglish(filebotExecution.isEnglish());
-    if (force) {
-      filebotExecutionToEdit.setStatus(FilebotStatus.UNPROCESSED);
-      filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
-      try {
-        producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
-      } catch (Exception e) {
-        log.error("Error with the execution {}", filebotExecution.getId(), e);
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-            "Error with the execution " + filebotExecution.getId());
-      }
-    } else {
-      filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
-    }
+
     return filebotExecutionToEdit;
   }
 
