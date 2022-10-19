@@ -60,10 +60,10 @@ public class FilebotExecutorRestController {
     }
 
     @PostMapping("/execute")
-    public BodyBuilder execute() {
+    public ResponseEntity<?> execute() {
         log.info("Manual execution");
         filebotService.execute();
-        return ResponseEntity.ok();
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @PostMapping
