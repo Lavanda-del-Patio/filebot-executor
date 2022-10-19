@@ -70,6 +70,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
       producerService.sendFilebotExecutionRecursive(filebotExecution);
     } catch (Exception e) {
       log.error("Error with the execution {}", qbittorrentModel.getName(), e);
+      throw new FilebotExecutorException("error with the creation of the execution", e);
     }
     return filebotExecution;
   }
@@ -106,8 +107,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
     try {
       producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
-    } catch (
-    Exception e) {
+    } catch (Exception e) {
       log.error("Error with the execution {}", filebotExecution.getId(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Error with the execution " + filebotExecution.getId());

@@ -50,6 +50,9 @@ public class FilebotExecution implements Serializable {
     @Field("status")
     private FilebotStatus status = FilebotStatus.UNPROCESSED;
 
+    @Field("log")
+    private String log;
+
     @CreatedDate
     @Field("created_at")
     private Date createdAt;
@@ -63,7 +66,7 @@ public class FilebotExecution implements Serializable {
 
     public enum FilebotStatus {
 
-        UNPROCESSED, PROCESSING, PROCESSED, PROCESSED_EXISTED, ERROR, FILES_NOT_FOUND;
+        UNPROCESSED, ON_TELEGRAM, ON_FILEBOT_EXECUTION, PROCESSED, FILES_EXISTED_IN_DESTINATION, ERROR, FILES_NOT_FOUND;
 
     }
 
