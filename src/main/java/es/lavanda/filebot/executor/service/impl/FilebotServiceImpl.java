@@ -59,10 +59,14 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Override
     public void execute() {
-        if (filebotExecutionRepository.findOneByStatus(FilebotStatus.ON_FILEBOT_EXECUTION.name()).isEmpty()) {
-            filebotExecutionRepository
-                    .findOneByStatus(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name())
-                    .ifPresent((fe) -> executionWithCommand(fe));
+        List<FilebotExecution> listOnFilebotExecution = filebotExecutionRepository
+                .findByStatusIn(List.of(FilebotStatus.ON_FILEBOT_EXECUTION.name()));
+        if (listOnFilebotExecution.isEmpty()) {
+            List<FilebotExecution> listNotProcessed = filebotExecutionRepository
+                    .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
+            if (Boolean.FALSE.equals(listNotProcessed.isEmpty())) {
+                executionWithCommand(listNotProcessed.get(0));
+            }
         }
     }
 
