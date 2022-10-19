@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
+import es.lavanda.filebot.executor.service.FilebotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,6 +41,9 @@ public class FilebotExecutorRestController {
     @Autowired
     private FilebotExecutorService filebotExecutorService;
 
+    @Autowired
+    private FilebotService filebotService;
+
     @GetMapping
     public ResponseEntity<Page<FilebotExecution>> getAll(Pageable pageable) {
         return ResponseEntity.ok(filebotExecutorService.getAllPageable(pageable));
@@ -52,6 +57,13 @@ public class FilebotExecutorRestController {
     @GetMapping("/files")
     public ResponseEntity<List<String>> getListOfPaths() {
         return ResponseEntity.ok(filebotExecutorService.getAllFiles());
+    }
+
+    @PostMapping("/execute")
+    public BodyBuilder execute() {
+        log.info("Manual execution");
+        filebotService.execute();
+        return ResponseEntity.ok();
     }
 
     @PostMapping
