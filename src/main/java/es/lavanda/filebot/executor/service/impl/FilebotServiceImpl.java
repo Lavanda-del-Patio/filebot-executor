@@ -39,9 +39,6 @@ public class FilebotServiceImpl implements FilebotService {
     private FilebotExecutionRepository filebotExecutionRepository;
 
     @Autowired
-    private ExecutorService executorService;
-
-    @Autowired
     private NotificationService notificationService;
 
     @Autowired
@@ -75,7 +72,7 @@ public class FilebotServiceImpl implements FilebotService {
                 .findById(filebotExecutionODTO.getId());
         if (optFilebotExecution.isPresent()
                 && Boolean.FALSE.equals(optFilebotExecution.get().getStatus() == FilebotStatus.PROCESSED)) {
-            executionCompleteWithQuery(optFilebotExecution.get(),
+            processWithQuery(optFilebotExecution.get(),
                     Optional.ofNullable(filebotExecutionODTO.getQuery())
                             .orElse(filebotExecutionODTO.getSelectedPossibilitie()),
                     filebotExecutionODTO.getLabel(), filebotExecutionODTO.isForceStrict());
@@ -84,67 +81,29 @@ public class FilebotServiceImpl implements FilebotService {
         }
     }
 
-    // @Override
-    // public void execute() {
-    // log.info("Executing Filebot Service");
-    // List<Path> paths = getAllFilesFounded(filebotUtils.getFilebotPathInput());
-    // paths.forEach(path -> {
-    // // log.info(path.toString());
-    // filebotExecutionRepository.findByFolderPath(path.toString()).ifPresentOrElse((filebotExecution)
-    // -> {
-    // if (filebotExecution.getStatus().equals(FilebotStatus.PROCESSED)) {
-    // // log.info("Path {} PROCESSED, reexecution", path.toString());
-    // // reexcutionWithCommand(filebotExecution);
-    // } else if (filebotExecution.getStatus().equals(FilebotStatus.UNPROCESSED)) {
-    // log.info("Path {} UNPROCESSED", path.toString());
-    // executionComplete(filebotExecution);
-    // } else if (filebotExecution.getStatus().equals(FilebotStatus.ERROR)
-    // || filebotExecution.getStatus().equals(FilebotStatus.FILES_NOT_FOUND)) {
-    // log.info("Path {} ERROR, reexecution", path.toString());
-    // reexcutionWithCommand(filebotExecution);
-    // }
-    // }, () -> {
-    // log.info("Path {} not processed. Starting new execution", path.toString());
-    // // NO ESTA PRESENTE, SE TIENE QUE EJECUTAR
-    // FilebotExecution filebotExecution = new FilebotExecution();
-    // filebotExecution.setFolderPath(path.toString());
-    // filebotExecution.setCommand(filebotUtils.getFilebotCommand(path, null, null,
-    // false));
-    // filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
-    // save(filebotExecution);
-    // executionComplete(filebotExecution);
-    // });
-    // });
-    // }
-
     private void executionWithCommand(FilebotExecution filebotExecution) {
-        log.info("On ExecutionComplete");
+        log.info("On Execution With Command: {}", filebotExecution);
         String execution = null;
         try {
+            filebotExecution.setStatus(FilebotStatus.ON_FILEBOT_EXECUTION);
+            save(filebotExecution);
             execution = filebotAMCExecutor
                     .execute(filebotExecution.getCommand());
             log.info("Result of Execution {}", execution);
+            filebotExecution.setLog(execution);
+            save(filebotExecution);
             completedFilebotExecution(filebotExecution, execution);
         } catch (FilebotAMCException e) {
             handleException(filebotExecution, e.getExecutionMessage(), e);
         }
     }
 
-    private void executionCompleteWithQuery(FilebotExecution filebotExecution, String query, String utLabel,
+    private void processWithQuery(FilebotExecution filebotExecution, String query, String utLabel,
             boolean forceStrict) {
         log.info("On ExecutionComplete with Query");
-        String execution = null;
-        try {
-            filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), query,
-                    utLabel, forceStrict, filebotExecution.isEnglish()));
-            save(filebotExecution);
-            execution = filebotAMCExecutor
-                    .execute(filebotExecution.getCommand());
-            log.info("Result of Execution {}", execution);
-            completedFilebotExecution(filebotExecution, execution);
-        } catch (FilebotAMCException e) {
-            handleException(filebotExecution, e.getExecutionMessage(), e);
-        }
+        filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), query,
+                utLabel, forceStrict, filebotExecution.isEnglish()));
+        producerService.sendFilebotExecutionRecursive(filebotExecutionRepository.save(filebotExecution));
     }
 
     private void handleException(FilebotExecution filebotExecution, String execution, FilebotAMCException e) {
@@ -198,7 +157,7 @@ public class FilebotServiceImpl implements FilebotService {
         // filebotExecution.setNewParentPath(getFolderPathOfFiles(newFilesname));
         filebotExecution.setFiles(oldFilesName);
         filebotExecution.setNewFiles(newFilesname);
-        filebotExecution.setStatus(FilebotStatus.PROCESSED_EXISTED);
+        filebotExecution.setStatus(FilebotStatus.FILES_EXISTED_IN_DESTINATION);
         save(filebotExecution);
     }
 
@@ -216,14 +175,15 @@ public class FilebotServiceImpl implements FilebotService {
         }
     }
 
-    private void selectOptions(FilebotExecution filebotExecution, String string) {
-        // FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
-        // filebotExecutionIDTO.setId(filebotExecution.getId());
-        // filebotExecutionIDTO.setFiles(filebotExecution.getFilesName());
-        // filebotExecutionIDTO.setPath(filebotExecution.getFolderPath());
-        // filebotExecution.setPossibilities(Arrays.asList(string.split("\n")));
-        // producerService.sendFilebotExecution(filebotExecutionIDTO);
-    }
+    // private void selectOptions(FilebotExecution filebotExecution, String string)
+    // {
+    // // FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
+    // // filebotExecutionIDTO.setId(filebotExecution.getId());
+    // // filebotExecutionIDTO.setFiles(filebotExecution.getFilesName());
+    // // filebotExecutionIDTO.setPath(filebotExecution.getFolderPath());
+    // // filebotExecution.setPossibilities(Arrays.asList(string.split("\n")));
+    // // producerService.sendFilebotExecution(filebotExecutionIDTO);
+    // }
 
     private void strictOrQuery(FilebotExecution filebotExecution, String execution) {
         Matcher matcherGroupContent = PATTERN_SELECT_CONTENT.matcher(execution);
@@ -241,7 +201,7 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecutionIDTO.setFiles(filebotExecution.getFiles());
         filebotExecutionIDTO.setPath(filebotExecution.getPath().toString());
         producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
-        filebotExecution.setStatus(FilebotStatus.PROCESSING);
+        filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM);
         save(filebotExecution);
     }
 
@@ -249,18 +209,19 @@ public class FilebotServiceImpl implements FilebotService {
         return filebotExecutionRepository.save(filebotExecution);
     }
 
-    private List<Path> getAllFilesFounded(String path) {
-        log.info("All files founded method");
-        try (Stream<Path> walk = Files.walk(Paths.get(path), 1)) {
-            List<Path> paths = walk.filter(Files::isDirectory)
-                    .collect(Collectors.toList());
-            paths.remove(0);
-            return paths;
-        } catch (IOException e) {
-            log.error("Can not access to path {}", filebotUtils.getFilebotPathInput(), e);
-            throw new FilebotExecutorException("Can not access to path", e);
-        }
-    }
+    // private List<Path> getAllFilesFounded(String path) {
+    // log.info("All files founded method");
+    // try (Stream<Path> walk = Files.walk(Paths.get(path), 1)) {
+    // List<Path> paths = walk.filter(Files::isDirectory)
+    // .collect(Collectors.toList());
+    // paths.remove(0);
+    // return paths;
+    // } catch (IOException e) {
+    // log.error("Can not access to path {}", filebotUtils.getFilebotPathInput(),
+    // e);
+    // throw new FilebotExecutorException("Can not access to path", e);
+    // }
+    // }
 
     private void completedFilebotExecution(FilebotExecution filebotExecution, String execution) {
         log.info("CompletedFilebotExecution {}", execution);
@@ -284,21 +245,21 @@ public class FilebotServiceImpl implements FilebotService {
         save(filebotExecution);
     }
 
-    private String getFolderPathOfFiles(List<String> newFilesname) {
-        for (String string : newFilesname) {
-            Path path = Paths.get(string);
-            return path.getParent().getFileName().toString();
-        }
-        return null;
-    }
+    // private String getFolderPathOfFiles(List<String> newFilesname) {
+    // for (String string : newFilesname) {
+    // Path path = Paths.get(string);
+    // return path.getParent().getFileName().toString();
+    // }
+    // return null;
+    // }
 
-    private String getFolderPath(String folderPath) {
-        if (Objects.nonNull(folderPath)) {
-            Path path = Paths.get(folderPath);
-            return path.getFileName().toString();
-        }
-        return null;
-    }
+    // private String getFolderPath(String folderPath) {
+    // if (Objects.nonNull(folderPath)) {
+    // Path path = Paths.get(folderPath);
+    // return path.getFileName().toString();
+    // }
+    // return null;
+    // }
 
     private String getFilename(String fromContent) {
         if (Objects.nonNull(fromContent)) {

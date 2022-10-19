@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 import es.lavanda.filebot.executor.exception.FilebotAMCException;
 import es.lavanda.filebot.executor.exception.FilebotAMCException.Type;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
@@ -29,11 +31,14 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
 
+    private static final Pattern PATTERN_NOT_FILE_SELECTED = Pattern.compile("No files selected for processing");
+
     @Override
     public String execute(String command) {
         StringBuilder execution = filebotExecution(command);
         isNotLicensed(execution.toString());
         // isNoProcessingFiles(execution.toString());
+        isNoFilesSelected(execution.toString());
         isNonStrictOrQuery(execution.toString());
         isChooseOptions(execution.toString());
         isFileExists(execution.toString());
@@ -73,6 +78,13 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         }
     }
 
+    private void isNoFilesSelected(String string) {
+        Matcher matcherNoFilesSelected = PATTERN_NOT_FILE_SELECTED.matcher(string);
+        if (matcherNoFilesSelected.find()) {
+            throw new FilebotAMCException(Type.FILES_NOT_FOUND, string);
+        }
+    }
+
     private void isNonStrictOrQuery(String execution) {
         if (execution.contains("Consider using -non-strict to enable opportunistic matching")
                 || execution.contains("No episode data found:")
@@ -97,12 +109,12 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         }
     }
 
-    private void isNoProcessingFiles(String execution) {
-        Matcher matcherNoProcessedFiles = PATTERN_NO_PROCESSED_FILES.matcher(execution);
-        if (matcherNoProcessedFiles.find()) {
-            throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
-        }
-    }
+    // private void isNoProcessingFiles(String execution) {
+    //     Matcher matcherNoProcessedFiles = PATTERN_NO_PROCESSED_FILES.matcher(execution);
+    //     if (matcherNoProcessedFiles.find()) {
+    //         throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
+    //     }
+    // }
 
     private void isChooseOptions(String execution) {
         if (execution.contains("XXXX")) {
