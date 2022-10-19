@@ -58,11 +58,10 @@ public class FilebotServiceImpl implements FilebotService {
             .compile("Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
 
     @Override
-    public FilebotExecution execute(FilebotExecution filebotExecution) {
-        filebotExecution.setStatus(FilebotStatus.UNPROCESSED);
-        save(filebotExecution);
-        executionWithCommand(filebotExecution);
-        return filebotExecution;
+    public void execute() {
+        filebotExecutionRepository
+                .findOneByStatus(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name())
+                .ifPresent((fe) -> executionWithCommand(fe));
     }
 
     @Override
@@ -103,7 +102,8 @@ public class FilebotServiceImpl implements FilebotService {
         log.info("On ExecutionComplete with Query");
         filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), query,
                 utLabel, forceStrict, filebotExecution.isEnglish()));
-        producerService.sendFilebotExecutionRecursive(filebotExecutionRepository.save(filebotExecution));
+        filebotExecution.setStatus(FilebotStatus.PENDING);
+        filebotExecutionRepository.save(filebotExecution);
     }
 
     private void handleException(FilebotExecution filebotExecution, String execution, FilebotAMCException e) {
@@ -243,6 +243,7 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecution.setNewPath(newParentFolderPath);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
         save(filebotExecution);
+        execute();
     }
 
     // private String getFolderPathOfFiles(List<String> newFilesname) {

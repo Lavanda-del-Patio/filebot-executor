@@ -65,14 +65,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     filebotExecution
         .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
             filebotExecution.isEnglish()));
-    filebotExecution = filebotExecutionRepository.save(filebotExecution);
-    try {
-      producerService.sendFilebotExecutionRecursive(filebotExecution);
-    } catch (Exception e) {
-      log.error("Error with the execution {}", qbittorrentModel.getName(), e);
-      throw new FilebotExecutorException("error with the creation of the execution", e);
-    }
-    return filebotExecution;
+    return filebotExecutionRepository.save(filebotExecution);
   }
 
   @Override
@@ -104,16 +97,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
       return fe;
     }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
         "FilebotExecution not found with the id " + id));
-    filebotExecutionToEdit = filebotExecutionRepository.save(filebotExecutionToEdit);
-    try {
-      producerService.sendFilebotExecutionRecursive(filebotExecutionToEdit);
-    } catch (Exception e) {
-      log.error("Error with the execution {}", filebotExecution.getId(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error with the execution " + filebotExecution.getId());
-    }
-
-    return filebotExecutionToEdit;
+    return filebotExecutionRepository.save(filebotExecutionToEdit);
   }
 
   private void checkSameId(FilebotExecution filebotExecution, String id) {

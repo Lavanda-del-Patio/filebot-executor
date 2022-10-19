@@ -19,4 +19,6 @@ public interface FilebotExecutionRepository extends PagingAndSortingRepository<F
 
     Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
 
+    Optional<FilebotExecution> findOneByStatus(String status, String status2);
+
 }

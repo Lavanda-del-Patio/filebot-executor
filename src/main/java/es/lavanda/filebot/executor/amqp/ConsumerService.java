@@ -18,18 +18,18 @@ public class ConsumerService {
 
     @RabbitListener(queues = "filebot-telegram-resolution")
     public void consumeMessageFilebotExecutor(FilebotExecutionODTO filebotExecutionODTO) {
-        log.debug("Reading message of the queue filebot-telegram-resolution: {}", filebotExecutionODTO);
+        log.info("Reading message of the queue filebot-telegram-resolution: {}", filebotExecutionODTO);
         filebotServiceImpl.resolution(filebotExecutionODTO);
-        log.debug("Work message finished");
+        log.info("Work message finished");
     }
 
 
-    @RabbitListener(queues = "filebot-execution")
-    public void consumeMessage(FilebotExecution filebotExecution) {
-        log.debug("Reading message of the queue filebot-execution: {}", filebotExecution);
-        filebotServiceImpl.execute(filebotExecution);
-        log.debug("Work message finished");
-    }
+    // @RabbitListener(queues = "filebot-execution")
+    // public void consumeMessage(FilebotExecution filebotExecution) {
+    //     log.info("Reading message of the queue filebot-execution: {}", filebotExecution);
+    //     filebotServiceImpl.execute(filebotExecution);
+    //     log.info("Work message finished");
+    // }
 
 
     // @RabbitListener(queues = "bittorent-checker")

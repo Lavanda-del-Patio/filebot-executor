@@ -5,7 +5,7 @@ import es.lavanda.lib.common.model.FilebotExecutionODTO;
 
 public interface FilebotService {
 
-    FilebotExecution execute(FilebotExecution filebotExecution);
+    void execute();
 
     void resolution(FilebotExecutionODTO filebotExecutionODTO);
 
