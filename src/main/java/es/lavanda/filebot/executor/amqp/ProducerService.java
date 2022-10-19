@@ -29,15 +29,15 @@ public class ProducerService {
         }
     }
 
-    public void sendFilebotExecutionRecursive(FilebotExecution filebot) {
-        try {
-            log.info("Sending message to queue {} the content {} ", FILEBOT_EXECUTION_QUEUE, filebot);
-            rabbitTemplate.convertAndSend("filebot-execution", filebot);
-            log.info("Sended message to queue {}", FILEBOT_EXECUTION_QUEUE);
-        } catch (Exception e) {
-            log.error("Failed send message to queue {}", FILEBOT_EXECUTION_QUEUE, e);
-            throw new FilebotExecutorException("Failed send message to queue", e);
-        }
-    }
+    // public void sendFilebotExecutionRecursive(FilebotExecution filebot) {
+    //     try {
+    //         log.info("Sending message to queue {} the content {} ", FILEBOT_EXECUTION_QUEUE, filebot);
+    //         rabbitTemplate.convertAndSend("filebot-execution", filebot);
+    //         log.info("Sended message to queue {}", FILEBOT_EXECUTION_QUEUE);
+    //     } catch (Exception e) {
+    //         log.error("Failed send message to queue {}", FILEBOT_EXECUTION_QUEUE, e);
+    //         throw new FilebotExecutorException("Failed send message to queue", e);
+    //     }
+    // }
 
 }
