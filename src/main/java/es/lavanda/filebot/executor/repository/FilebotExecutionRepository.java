@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 
 import es.lavanda.filebot.executor.model.FilebotExecution;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -19,6 +20,6 @@ public interface FilebotExecutionRepository extends PagingAndSortingRepository<F
 
     Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
 
-    Optional<FilebotExecution> findOneByStatus(String... status);
+    List<FilebotExecution> findByStatusIn(List<String> status);
 
 }
