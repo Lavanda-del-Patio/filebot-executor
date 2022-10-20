@@ -139,6 +139,7 @@ public class FilebotServiceImpl implements FilebotService {
             default:
                 break;
         }
+        execute();
     }
 
     private void filesNotFound(FilebotExecution filebotExecution, String execution) {
