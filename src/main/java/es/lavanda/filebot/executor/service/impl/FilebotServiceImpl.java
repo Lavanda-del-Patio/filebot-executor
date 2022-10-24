@@ -42,6 +42,9 @@ public class FilebotServiceImpl implements FilebotService {
     private NotificationService notificationService;
 
     @Autowired
+    private ExecutorService executorService;
+
+    @Autowired
     private ProducerService producerService;
 
     @Autowired
@@ -59,15 +62,23 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Override
     public void execute() {
-        List<FilebotExecution> listOnFilebotExecution = filebotExecutionRepository
-                .findByStatusIn(List.of(FilebotStatus.ON_FILEBOT_EXECUTION.name()));
-        if (listOnFilebotExecution.isEmpty()) {
-            List<FilebotExecution> listNotProcessed = filebotExecutionRepository
-                    .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
-            if (Boolean.FALSE.equals(listNotProcessed.isEmpty())) {
-                executionWithCommand(listNotProcessed.get(0));
+        Runnable runnableTask = () -> {
+            try {
+                List<FilebotExecution> listOnFilebotExecution = filebotExecutionRepository
+                        .findByStatusIn(List.of(FilebotStatus.ON_FILEBOT_EXECUTION.name()));
+                if (listOnFilebotExecution.isEmpty()) {
+                    List<FilebotExecution> listNotProcessed = filebotExecutionRepository
+                            .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
+                    if (Boolean.FALSE.equals(listNotProcessed.isEmpty())) {
+                        executionWithCommand(listNotProcessed.get(0));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error executing filebot", e);
+                throw e;
             }
-        }
+        };
+        executorService.execute(runnableTask);
     }
 
     @Override

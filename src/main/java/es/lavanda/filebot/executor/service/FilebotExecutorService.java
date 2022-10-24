@@ -10,7 +10,7 @@ import es.lavanda.filebot.executor.model.QbittorrentModel;
 
 public interface FilebotExecutorService {
 
-    Page<FilebotExecution> getAllPageable(Pageable pageable);
+    Page<FilebotExecution> getAllPageable(Pageable pageable, String status, String name);
 
     FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel);
 

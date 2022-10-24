@@ -39,13 +39,22 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   private FilebotUtils filebotUtils;
 
   @Autowired
-  private ProducerService producerService;
-
-  @Autowired
   private FileService fileServiceImpl;
 
   @Override
-  public Page<FilebotExecution> getAllPageable(Pageable pageable) {
+  public Page<FilebotExecution> getAllPageable(Pageable pageable, String status, String path) {
+    if (Objects.nonNull(status) && Objects.nonNull(path)) {
+      // log.info("findAllByStatusAndPath");
+      return filebotExecutionRepository.findAllByStatusAndPathContainingOrderByLastModifiedAtDesc(pageable, status, path);
+    } else if (Objects.nonNull(path)) {
+      // log.info("findAllByPath");
+      return filebotExecutionRepository.findAllByPathContainingOrderByLastModifiedAtDesc(pageable, path);
+    } else if (Objects.nonNull(status)) {
+      // log.info("findAllByStatus");
+      return filebotExecutionRepository.findAllByStatusOrderByLastModifiedAtDesc(pageable, status);
+    }
+    log.info("findAllByOrderByLastModifiedAtDesc");
+
     return filebotExecutionRepository.findAllByOrderByLastModifiedAtDesc(pageable);
   }
 
@@ -112,4 +121,5 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     return fileServiceImpl
         .ls(filebotUtils.getFilebotPathInput());
   }
+
 }

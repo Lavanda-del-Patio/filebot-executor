@@ -45,8 +45,9 @@ public class FilebotExecutorRestController {
     private FilebotService filebotService;
 
     @GetMapping
-    public ResponseEntity<Page<FilebotExecution>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(filebotExecutorService.getAllPageable(pageable));
+    public ResponseEntity<Page<FilebotExecution>> getAll(Pageable pageable,
+            @RequestParam(required = false) String status, @RequestParam(required = false) String path) {
+        return ResponseEntity.ok(filebotExecutorService.getAllPageable(pageable, status, path));
     }
 
     @GetMapping("/{id}")
