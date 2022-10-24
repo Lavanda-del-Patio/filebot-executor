@@ -45,10 +45,10 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   public Page<FilebotExecution> getAllPageable(Pageable pageable, String status, String path) {
     if (Objects.nonNull(status) && Objects.nonNull(path)) {
       // log.info("findAllByStatusAndPath");
-      return filebotExecutionRepository.findAllByStatusAndPathContainingOrderByLastModifiedAtDesc(pageable, status, path);
+      return filebotExecutionRepository.findAllByStatusAndPathContainingIgnoreCaseOrderByLastModifiedAtDesc(pageable, status, path);
     } else if (Objects.nonNull(path)) {
       // log.info("findAllByPath");
-      return filebotExecutionRepository.findAllByPathContainingOrderByLastModifiedAtDesc(pageable, path);
+      return filebotExecutionRepository.findAllByPathIgnoreCaseContainingOrderByLastModifiedAtDesc(pageable, path);
     } else if (Objects.nonNull(status)) {
       // log.info("findAllByStatus");
       return filebotExecutionRepository.findAllByStatusOrderByLastModifiedAtDesc(pageable, status);

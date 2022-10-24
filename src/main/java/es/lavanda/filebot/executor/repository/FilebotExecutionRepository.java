@@ -20,11 +20,11 @@ public interface FilebotExecutionRepository extends PagingAndSortingRepository<F
 
     Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
 
-    Page<FilebotExecution> findAllByStatusAndPathContainingOrderByLastModifiedAtDesc(Pageable pageable, String status, String path);
+    Page<FilebotExecution> findAllByStatusAndPathContainingIgnoreCaseOrderByLastModifiedAtDesc(Pageable pageable, String status, String path);
 
     Page<FilebotExecution> findAllByStatusOrderByLastModifiedAtDesc(Pageable pageable, String status);
 
-    Page<FilebotExecution> findAllByPathContainingOrderByLastModifiedAtDesc(Pageable pageable, String path);
+    Page<FilebotExecution> findAllByPathIgnoreCaseContainingOrderByLastModifiedAtDesc(Pageable pageable, String path);
 
     List<FilebotExecution> findByStatusIn(List<String> status);
 
