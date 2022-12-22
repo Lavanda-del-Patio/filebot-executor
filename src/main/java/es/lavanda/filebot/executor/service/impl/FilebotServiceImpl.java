@@ -28,7 +28,7 @@ import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
-import es.lavanda.lib.common.service.NotificationService;
+// import es.lavanda.lib.common.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -38,8 +38,8 @@ public class FilebotServiceImpl implements FilebotService {
     @Autowired
     private FilebotExecutionRepository filebotExecutionRepository;
 
-    @Autowired
-    private NotificationService notificationService;
+    // @Autowired
+    // private NotificationService notificationService;
 
     @Autowired
     private ExecutorService executorService;

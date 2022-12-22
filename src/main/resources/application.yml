@@ -10,4 +10,4 @@ cloud:
     region:
       static: eu-west-1
     sns:
-      enabled: true    
+      enabled: false    
