@@ -17,6 +17,7 @@ import es.lavanda.filebot.executor.amqp.ProducerService;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.model.QbittorrentModel;
+import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FileService;
@@ -45,7 +46,8 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   public Page<FilebotExecution> getAllPageable(Pageable pageable, String status, String path) {
     if (Objects.nonNull(status) && Objects.nonNull(path)) {
       // log.info("findAllByStatusAndPath");
-      return filebotExecutionRepository.findAllByStatusAndPathContainingIgnoreCaseOrderByLastModifiedAtDesc(pageable, status, path);
+      return filebotExecutionRepository.findAllByStatusAndPathContainingIgnoreCaseOrderByLastModifiedAtDesc(pageable,
+          status, path);
     } else if (Objects.nonNull(path)) {
       // log.info("findAllByPath");
       return filebotExecutionRepository.findAllByPathIgnoreCaseContainingOrderByLastModifiedAtDesc(pageable, path);
@@ -60,7 +62,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
   @Override
   public FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel) {
-    log.info("Creating new Filebot Execution about torrent id {} and name", qbittorrentModel.getId(),
+    log.info("Creating new Filebot Execution about torrent id {} and name {}", qbittorrentModel.getId(),
         qbittorrentModel.getName());
     if (filebotExecutionRepository.findByPath(qbittorrentModel.getName().toString()).isPresent()) {
       throw new FilebotExecutorException("FilebotExecution already exists");
@@ -68,12 +70,13 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     FilebotExecution filebotExecution = new FilebotExecution();
     filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
     filebotExecution.setCategory(qbittorrentModel.getCategory());
+    filebotExecution.setAction(FilebotAction.COPY);
     if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
       filebotExecution.setEnglish(true);
     }
     filebotExecution
         .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
-            filebotExecution.isEnglish()));
+            filebotExecution.isEnglish(), filebotExecution.getAction()));
     return filebotExecutionRepository.save(filebotExecution);
   }
 
@@ -99,9 +102,10 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
       fe.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
       fe.setCategory(filebotExecution.getCategory());
       fe.setEnglish(fe.getCategory().equalsIgnoreCase("tv-sonarr-en") ? true : false);
+      fe.setAction(filebotExecution.getAction());
       fe.setCommand(Objects.nonNull(filebotExecution.getCommand()) ? filebotExecution.getCommand()
           : filebotUtils.getFilebotCommand(Path.of(fe.getPath()), null,
-              null, false, fe.isEnglish()));
+              null, false, fe.isEnglish(), filebotExecution.getAction()));
       fe.setStatus(FilebotStatus.UNPROCESSED);
       return fe;
     }).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -118,8 +122,48 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
   @Override
   public List<String> getAllFiles() {
-    return fileServiceImpl
-        .ls(filebotUtils.getFilebotPathInput());
+    return getAllFiles(null);
+  }
+
+  @Override
+  public void createBatchExecutionForMovie() {
+    // for (String folderMovie : getAllFiles("/")) {
+    createNewExecution(getAllFiles("/Peliculas").get(0), "radarr");
+    // }
+  }
+
+  @Override
+  public void createBatchExecutionForShow() {
+    // for (String folderMovie : getAllFiles("/")) {
+    createNewExecution(getAllFiles("/Series").get(0), "tv-sonarr");
+
+    // }
+  }
+
+  private List<String> getAllFiles(String path) {
+    if (Objects.isNull(path)) {
+      fileServiceImpl.ls(filebotUtils.getFilebotPathInput());
+    }
+    return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
+  }
+
+  private FilebotExecution createNewExecution(String path, String category) {
+    log.info("Creating new manual Filebot Execution about torrent path {} name",
+        path);
+    if (filebotExecutionRepository.findByPath(path).isPresent()) {
+      throw new FilebotExecutorException("FilebotExecution already exists");
+    }
+    FilebotExecution filebotExecution = new FilebotExecution();
+    filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + "/" + path);
+    filebotExecution.setCategory(category);
+    filebotExecution.setAction(FilebotAction.MOVE);
+    if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+      filebotExecution.setEnglish(true);
+    }
+    filebotExecution
+        .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
+            filebotExecution.isEnglish(), filebotExecution.getAction()));
+    return filebotExecutionRepository.save(filebotExecution);
   }
 
 }
