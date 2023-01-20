@@ -6,6 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -30,7 +31,7 @@ public class FilebotUtils {
                 getFilebotPathData().trim() + "/license.psm";
     }
 
-    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english) {
+    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english, FilebotAction action) {
         log.info("FOLDER PATH {}", folderPath);
         String queryFilled = "";
         String nonStrict = "";
@@ -51,7 +52,7 @@ public class FilebotUtils {
         }
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
                 getOutputFormat() +
-                getAction() +
+                getAction(action) +
                 getDatabase() +
                 lang +
                 FilebotConstants.ORDER_AIRDATE.toString() +
@@ -66,11 +67,18 @@ public class FilebotUtils {
                 queryFilled + nonStrict + utLabel;
     }
 
-    private String getAction() {
+    private String getAction(FilebotAction action) {
         if (Boolean.TRUE.equals(FILEBOT_TEST_ENABLED)) {
             return FilebotConstants.ACTION_TEST.toString();
-        } else
-            return FilebotConstants.ACTION_MOVE.toString();
+        }
+        switch (action) {
+            case COPY:
+                return FilebotConstants.ACTION_COPY.toString();
+            case MOVE:
+                return FilebotConstants.ACTION_MOVE.toString();
+            default:
+                return FilebotConstants.ACTION_COPY.toString();
+        }
     }
 
     public String getFilebotPathInput() {

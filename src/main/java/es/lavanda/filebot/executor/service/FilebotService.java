@@ -7,6 +7,7 @@ public interface FilebotService {
 
     void execute();
 
+
     void resolution(FilebotExecutionODTO filebotExecutionODTO);
 
 }

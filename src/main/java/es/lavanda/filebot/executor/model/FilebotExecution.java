@@ -1,15 +1,12 @@
 package es.lavanda.filebot.executor.model;
 
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -47,6 +44,9 @@ public class FilebotExecution implements Serializable {
     @Field("english")
     private boolean english;
 
+    @Field("subtitles")
+    private FilebotAction action = FilebotAction.COPY;
+
     @Field("status")
     private FilebotStatus status = FilebotStatus.UNPROCESSED;
 
@@ -71,4 +71,7 @@ public class FilebotExecution implements Serializable {
 
     }
 
+    public enum FilebotAction {
+        COPY, MOVE;
+    }
 }

@@ -67,22 +67,36 @@ public class FilebotExecutorRestController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
+    @PostMapping("/execute/movie")
+    public ResponseEntity<?> executeMovieManual() {
+        log.info("Manual execution");
+        filebotExecutorService.createBatchExecutionForMovie();
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    @PostMapping("/execute/show")
+    public ResponseEntity<?> executeShowManual() {
+        log.info("Manual execution");
+        filebotExecutorService.createBatchExecutionForShow();
+        return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<FilebotExecution> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
-        log.info("Reciveid qbittorrentModel: {}", qbittorrentModel);
+        log.info("Received qbittorrentModel: {}", qbittorrentModel);
         return ResponseEntity.ok(filebotExecutorService.createNewExecution(qbittorrentModel));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<FilebotExecution> editExecution(@PathVariable String id,
             @RequestBody FilebotExecution filebotExecution) {
-        log.info("Reciveid edit for ID: {}", id);
+        log.info("Received edit for ID: {}", id);
         return ResponseEntity.ok(filebotExecutorService.editExecution(id, filebotExecution));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        log.info("Reciveid delete for ID: {}", id);
+        log.info("Received delete for ID: {}", id);
         filebotExecutorService.delete(id);
         return ResponseEntity.noContent().build();
     }
