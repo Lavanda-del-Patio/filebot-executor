@@ -128,15 +128,22 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   @Override
   public void createBatchExecutionForMovie() {
     // for (String folderMovie : getAllFiles("/")) {
-    createNewExecution(getAllFiles("/Peliculas").get(0), "radarr");
+    List<String> allFiles = getAllFiles("/PeliculasToOrdered");
+    int min = 0;
+    int max = allFiles.size();
+    int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
+    createNewExecution(allFiles.get(selectedFolder), "radarr", "/Peliculas");
     // }
   }
 
   @Override
   public void createBatchExecutionForShow() {
     // for (String folderMovie : getAllFiles("/")) {
-    createNewExecution(getAllFiles("/Series").get(0), "tv-sonarr");
-
+    List<String> allFiles = getAllFiles("/SeriesToOrdered");
+    int min = 0;
+    int max = allFiles.size();
+    int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
+    createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/Series");
     // }
   }
 
@@ -147,14 +154,14 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
   }
 
-  private FilebotExecution createNewExecution(String path, String category) {
+  private FilebotExecution createNewExecution(String path, String category, String folderPathForOutput) {
     log.info("Creating new manual Filebot Execution about torrent path {} name",
         path);
     if (filebotExecutionRepository.findByPath(path).isPresent()) {
       throw new FilebotExecutorException("FilebotExecution already exists");
     }
     FilebotExecution filebotExecution = new FilebotExecution();
-    filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + "/" + path);
+    filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + folderPathForOutput + "/" + path);
     filebotExecution.setCategory(category);
     filebotExecution.setAction(FilebotAction.MOVE);
     if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {

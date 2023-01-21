@@ -118,7 +118,7 @@ public class FilebotServiceImpl implements FilebotService {
             boolean forceStrict) {
         log.info("On ExecutionComplete with Query");
         filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), query,
-                utLabel, forceStrict, filebotExecution.isEnglish(),filebotExecution.getAction()));
+                utLabel, forceStrict, filebotExecution.isEnglish(), filebotExecution.getAction()));
         filebotExecution.setStatus(FilebotStatus.PENDING);
         filebotExecutionRepository.save(filebotExecution);
     }
@@ -287,7 +287,5 @@ public class FilebotServiceImpl implements FilebotService {
         }
         return fromContent;
     }
-
- 
 
 }
