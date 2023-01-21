@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,13 @@ public class FileServiceImpl implements FileService {
             executorService.submit(streamGobbler);
             status = process.waitFor();
             if (status != 0) {
-                log.error("LS command result on fail");
+                log.error("LS command result on fail {}", lsResult.stream()
+                        .map(n -> String.valueOf(n))
+                        .collect(Collectors.joining("\n", "IN-", "-OUT")));
             } else {
-                log.info("LS command result on success");
+                log.info("LS command result on success {}", lsResult.stream()
+                        .map(n -> String.valueOf(n))
+                        .collect(Collectors.joining("\n", "IN-", "-OUT")));
             }
             return lsResult;
         } catch (InterruptedException | IOException e) {
