@@ -122,13 +122,13 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
   @Override
   public List<String> getAllFiles() {
-    return getAllFiles(null);
+    return getAllFilesInput();
   }
 
   @Override
   public void createBatchExecutionForMovie() {
     // for (String folderMovie : getAllFiles("/")) {
-    List<String> allFiles = getAllFiles("/PeliculasToOrdered");
+    List<String> allFiles = getAllFilesOutput("/PeliculasToOrdered");
     int min = 0;
     int max = allFiles.size();
     int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
@@ -139,7 +139,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   @Override
   public void createBatchExecutionForShow() {
     // for (String folderMovie : getAllFiles("/")) {
-    List<String> allFiles = getAllFiles("/SeriesToOrdered");
+    List<String> allFiles = getAllFilesOutput("/SeriesToOrdered");
     int min = 0;
     int max = allFiles.size();
     int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
@@ -147,11 +147,12 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     // }
   }
 
-  private List<String> getAllFiles(String path) {
-    if (Objects.isNull(path)) {
-      fileServiceImpl.ls(filebotUtils.getFilebotPathInput());
-    }
+  private List<String> getAllFilesOutput(String path) {
     return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
+  }
+
+  private List<String> getAllFilesInput() {
+    return fileServiceImpl.ls(filebotUtils.getFilebotPathInput());
   }
 
   private FilebotExecution createNewExecution(String path, String category, String folderPathForInput) {
