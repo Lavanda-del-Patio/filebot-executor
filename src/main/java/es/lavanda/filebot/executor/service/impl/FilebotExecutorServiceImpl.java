@@ -132,7 +132,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     int min = 0;
     int max = allFiles.size();
     int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-    createNewExecution(allFiles.get(selectedFolder), "radarr", "/Peliculas");
+    createNewExecution(allFiles.get(selectedFolder), "radarr", "/PeliculasToOrdered");
     // }
   }
 
@@ -143,7 +143,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     int min = 0;
     int max = allFiles.size();
     int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-    createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/Series");
+    createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/SeriesToOrdered");
     // }
   }
 
@@ -154,14 +154,14 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
   }
 
-  private FilebotExecution createNewExecution(String path, String category, String folderPathForOutput) {
+  private FilebotExecution createNewExecution(String path, String category, String folderPathForInput) {
     log.info("Creating new manual Filebot Execution about torrent path {} name",
         path);
     if (filebotExecutionRepository.findByPath(path).isPresent()) {
       throw new FilebotExecutorException("FilebotExecution already exists");
     }
     FilebotExecution filebotExecution = new FilebotExecution();
-    filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + folderPathForOutput + "/" + path);
+    filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + folderPathForInput + "/" + path);
     filebotExecution.setCategory(category);
     filebotExecution.setAction(FilebotAction.MOVE);
     if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
