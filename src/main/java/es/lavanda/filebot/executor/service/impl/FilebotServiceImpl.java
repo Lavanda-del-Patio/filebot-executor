@@ -21,8 +21,10 @@ import es.lavanda.filebot.executor.amqp.ProducerService;
 import es.lavanda.filebot.executor.exception.FilebotAMCException;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotExecution;
+import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
+import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
 import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
@@ -46,6 +48,9 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Autowired
     private ProducerService producerService;
+
+    @Autowired
+    private FileService fileService;
 
     @Autowired
     private FilebotAMCExecutor filebotAMCExecutor;
@@ -97,6 +102,7 @@ public class FilebotServiceImpl implements FilebotService {
         }
     }
 
+    // EL PROBLEMA DEL LOG ESTÁ AQUI, SE VA POR LA EXPCEPTION
     private void executionWithCommand(FilebotExecution filebotExecution) {
         log.info("On Execution With Command: {}", filebotExecution);
         String execution = null;
@@ -260,6 +266,9 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecution.setNewFiles(newFilesname);
         filebotExecution.setNewPath(newParentFolderPath);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
+        if (FilebotAction.MOVE.equals(filebotExecution.getAction())) {
+            fileService.rmdir(filebotExecution.getPath().toString());
+        }
         save(filebotExecution);
         execute();
     }

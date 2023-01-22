@@ -51,4 +51,33 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    @Override
+    public void rmdir(String path) {
+        int status;
+        List<String> lsResult = new ArrayList<>();
+        try {
+            Process process = new ProcessBuilder("bash", "-c", "rmdir " + path).redirectErrorStream(true)
+                    .start();
+            StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
+                // log.info("BASH commandline: {}", line);
+                lsResult.add(line);
+            });
+            executorService.submit(streamGobbler);
+            status = process.waitFor();
+            if (status != 0) {
+                log.error("RMDIR command result on fail {}", lsResult.stream()
+                        .map(n -> String.valueOf(n))
+                        .collect(Collectors.joining("\n", "IN-", "-OUT")));
+            } else {
+                log.info("RMDIR command result on success {}", lsResult.stream()
+                        .map(n -> String.valueOf(n))
+                        .collect(Collectors.joining("\n", "IN-", "-OUT")));
+            }
+        } catch (InterruptedException | IOException e) {
+            log.error("Exception on command 'RMDIR'", e);
+            Thread.currentThread().interrupt();
+            throw new FilebotExecutorException("Exception on command 'RMDIR'", e);
+        }
+    }
+
 }
