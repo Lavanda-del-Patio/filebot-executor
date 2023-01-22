@@ -94,11 +94,11 @@ public class FilebotUtils {
     }
 
     private enum Constants {
-        MOVIES_FORMAT(" 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})/{n} ({y})_{audioLanguages}_{vf}_{bitrate.space('_')}' "),
+        MOVIES_FORMAT(" 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})/{n} ({y})_{audioLanguages}_{vf}_{bitrate}' "),
         SHOWS_FORMAT(
-                " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}_{bitrate.space('_')}' "),
+                " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}_{bitrate}' "),
         SHOWS_EN_FORMAT(
-                " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series-EN/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}_{bitrate.space('_')}' "),
+                " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series-EN/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}_{bitrate}' "),
         OUTPUT_FORMAT(" --output \"FILEBOT_PATH_OUTPUT\" "),
         UNSORTED_FORMAT(" 'unsortedFormat=FILEBOT_PATH_INPUT/Unsorted/{fn}.{ext}' "),
         STORE_REPORT(" --def 'storeReport=FILEBOT_PATH_DATA/.reports' "),
