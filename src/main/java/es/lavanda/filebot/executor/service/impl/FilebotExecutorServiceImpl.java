@@ -132,8 +132,9 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     int min = 0;
     int max = allFiles.size();
     int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-    createNewExecution(allFiles.get(selectedFolder), "radarr", "/PeliculasToOrdered");
-    // }
+    for (int i = 0; i < 40; i++) {
+      createNewExecution(allFiles.get(i), "radarr", "/PeliculasToOrdered");
+    }
   }
 
   @Override
