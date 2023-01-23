@@ -39,7 +39,7 @@ public class FileServiceImpl implements FileService {
                         .map(n -> String.valueOf(n))
                         .collect(Collectors.joining("\n", "IN-", "-OUT")));
             } else {
-                log.info("LS command result on success {}", lsResult.stream()
+                log.debug("LS command result on success {}", lsResult.stream()
                         .map(n -> String.valueOf(n))
                         .collect(Collectors.joining("\n", "IN-", "-OUT")));
             }
@@ -69,7 +69,7 @@ public class FileServiceImpl implements FileService {
                         .map(n -> String.valueOf(n))
                         .collect(Collectors.joining("\n", "IN-", "-OUT")));
             } else {
-                log.info("RMDIR command result on success {}", lsResult.stream()
+                log.debug("RMDIR command result on success {}", lsResult.stream()
                         .map(n -> String.valueOf(n))
                         .collect(Collectors.joining("\n", "IN-", "-OUT")));
             }
