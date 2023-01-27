@@ -99,7 +99,9 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   public FilebotExecution editExecution(String id, FilebotExecution filebotExecution) {
     checkSameId(filebotExecution, id);
     FilebotExecution filebotExecutionToEdit = filebotExecutionRepository.findById(id).map(fe -> {
-      fe.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
+      if (Boolean.FALSE.equals(fe.isManual())){
+        fe.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
+      }
       fe.setCategory(filebotExecution.getCategory());
       fe.setEnglish(fe.getCategory().equalsIgnoreCase("tv-sonarr-en") ? true : false);
       fe.setAction(filebotExecution.getAction());
@@ -166,6 +168,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + folderPathForInput + "/" + path);
     filebotExecution.setCategory(category);
     filebotExecution.setAction(FilebotAction.MOVE);
+    filebotExecution.setManual(true);
     if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
       filebotExecution.setEnglish(true);
     }

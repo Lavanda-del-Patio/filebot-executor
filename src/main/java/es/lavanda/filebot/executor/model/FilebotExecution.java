@@ -44,8 +44,11 @@ public class FilebotExecution implements Serializable {
     @Field("english")
     private boolean english;
 
-    @Field("subtitles")
+    @Field("action")
     private FilebotAction action = FilebotAction.COPY;
+
+    @Field("manual")
+    private boolean manual;
 
     @Field("status")
     private FilebotStatus status = FilebotStatus.UNPROCESSED;
