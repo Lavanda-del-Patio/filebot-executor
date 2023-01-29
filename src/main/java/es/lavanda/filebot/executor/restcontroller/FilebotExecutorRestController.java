@@ -67,12 +67,12 @@ public class FilebotExecutorRestController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @PostMapping("/execute/movie")
-    public ResponseEntity<?> executeMovieManual() {
-        log.info("Manual execution");
-        filebotExecutorService.createBatchExecutionForMovie();
-        return new ResponseEntity<>(null, HttpStatus.OK);
-    }
+    // @PostMapping("/execute/movie")
+    // public ResponseEntity<?> executeMovieManual() {
+    //     log.info("Manual execution");
+    //     filebotExecutorService.createBatchExecutionForMovie();
+    //     return new ResponseEntity<>(null, HttpStatus.OK);
+    // }
 
     @PostMapping("/execute/show")
     public ResponseEntity<?> executeShowManual() {
