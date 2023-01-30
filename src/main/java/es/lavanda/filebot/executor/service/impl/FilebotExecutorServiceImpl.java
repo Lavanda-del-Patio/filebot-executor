@@ -127,17 +127,17 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     return getAllFilesInput();
   }
 
-  @Override
-  public void createBatchExecutionForMovie() {
-    // for (String folderMovie : getAllFiles("/")) {
-    List<String> allFiles = getAllFilesOutput("/PeliculasToOrdered");
-    int min = 0;
-    int max = allFiles.size();
-    int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-    for (int i = 0; i < 40; i++) {
-      createNewExecution(allFiles.get(i), "radarr", "/PeliculasToOrdered");
-    }
-  }
+  // @Override
+  // public void createBatchExecutionForMovie() {
+  //   // for (String folderMovie : getAllFiles("/")) {
+  //   List<String> allFiles = getAllFilesOutput("/PeliculasToOrdered");
+  //   int min = 0;
+  //   int max = allFiles.size();
+  //   int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
+  //   for (int i = 0; i < 40; i++) {
+  //     createNewExecution(allFiles.get(i), "radarr", "/PeliculasToOrdered");
+  //   }
+  // }
 
   @Override
   public void createBatchExecutionForShow() {
@@ -146,7 +146,10 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     int min = 0;
     int max = allFiles.size();
     int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-    createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/SeriesToOrdered");
+    for (String file : allFiles) {
+      createNewExecution(file, "tv-sonarr", "/SeriesToOrdered");
+    }
+    // createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/SeriesToOrdered");
     // }
   }
 
