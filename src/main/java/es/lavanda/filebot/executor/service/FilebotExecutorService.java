@@ -22,7 +22,7 @@ public interface FilebotExecutorService {
 
     List<String> getAllFiles();
 
-    void createBatchExecutionForMovie();
+    // void createBatchExecutionForMovie();
 
     void createBatchExecutionForShow();
 
