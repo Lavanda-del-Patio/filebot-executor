@@ -3,8 +3,6 @@ package es.lavanda.filebot.executor.service.impl;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,16 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import es.lavanda.filebot.executor.amqp.ProducerService;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotExecution;
-import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
+import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
-import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,9 +28,6 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
   @Autowired
   private FilebotExecutionRepository filebotExecutionRepository;
-
-  @Autowired
-  private FilebotService filebotService;
 
   @Autowired
   private FilebotUtils filebotUtils;
@@ -139,46 +132,46 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   //   }
   // }
 
-  @Override
-  public void createBatchExecutionForShow() {
-    // for (String folderMovie : getAllFiles("/")) {
-    List<String> allFiles = getAllFilesOutput("/SeriesToOrdered");
-    int min = 0;
-    int max = allFiles.size();
-    int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-    for (String file : allFiles) {
-      createNewExecution(file, "tv-sonarr", "/SeriesToOrdered");
-    }
-    // createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/SeriesToOrdered");
-    // }
-  }
+  // @Override
+  // public void createBatchExecutionForShow() {
+  //   // for (String folderMovie : getAllFiles("/")) {
+  //   List<String> allFiles = getAllFilesOutput("/SeriesToOrdered");
+  //   int min = 0;
+  //   int max = allFiles.size();
+  //   int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
+  //   for (String file : allFiles) {
+  //     createNewExecution(file, "tv-sonarr", "/SeriesToOrdered");
+  //   }
+  //   // createNewExecution(allFiles.get(selectedFolder), "tv-sonarr", "/SeriesToOrdered");
+  //   // }
+  // }
 
-  private List<String> getAllFilesOutput(String path) {
-    return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
-  }
+  // private List<String> getAllFilesOutput(String path) {
+  //   return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
+  // }
 
   private List<String> getAllFilesInput() {
     return fileServiceImpl.ls(filebotUtils.getFilebotPathInput());
   }
 
-  private FilebotExecution createNewExecution(String path, String category, String folderPathForInput) {
-    log.info("Creating new manual Filebot Execution about torrent path {} name",
-        path);
-    if (filebotExecutionRepository.findByPath(path).isPresent()) {
-      throw new FilebotExecutorException("FilebotExecution already exists");
-    }
-    FilebotExecution filebotExecution = new FilebotExecution();
-    filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + folderPathForInput + "/" + path);
-    filebotExecution.setCategory(category);
-    filebotExecution.setAction(FilebotAction.MOVE);
-    filebotExecution.setManual(true);
-    if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
-      filebotExecution.setEnglish(true);
-    }
-    filebotExecution
-        .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
-            filebotExecution.isEnglish(), filebotExecution.getAction()));
-    return filebotExecutionRepository.save(filebotExecution);
-  }
+  // private FilebotExecution createNewExecution(String path, String category, String folderPathForInput) {
+  //   log.info("Creating new manual Filebot Execution about torrent path {} name",
+  //       path);
+  //   if (filebotExecutionRepository.findByPath(path).isPresent()) {
+  //     throw new FilebotExecutorException("FilebotExecution already exists");
+  //   }
+  //   FilebotExecution filebotExecution = new FilebotExecution();
+  //   filebotExecution.setPath(filebotUtils.getFilebotPathOutput() + folderPathForInput + "/" + path);
+  //   filebotExecution.setCategory(category);
+  //   filebotExecution.setAction(FilebotAction.MOVE);
+  //   filebotExecution.setManual(true);
+  //   if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+  //     filebotExecution.setEnglish(true);
+  //   }
+  //   filebotExecution
+  //       .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
+  //           filebotExecution.isEnglish(), filebotExecution.getAction()));
+  //   return filebotExecutionRepository.save(filebotExecution);
+  // }
 
 }
