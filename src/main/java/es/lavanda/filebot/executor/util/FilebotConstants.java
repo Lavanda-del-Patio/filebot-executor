@@ -10,7 +10,7 @@ public enum FilebotConstants {
     ACTION_COPY(" --action copy "),
     LANG_ES(" --lang es "),
     LANG_EN(" --lang en "),
-    DATABASE(" --def movieDB=TheMovieDB seriesDB=TheTVDB::TV animeDB=AniDB::TV musicDB=ID3 "),
+    DATABASE(" --def movieDB=TheMovieDB seriesDB=TheTVDB animeDB=AniDB musicDB=ID3 "),
     ORDER_AIRDATE(" --order Airdate "),
     DEF(" --def "),
     LICENSE(" --license ");
