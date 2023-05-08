@@ -63,7 +63,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     FilebotExecution filebotExecution = new FilebotExecution();
     filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
     filebotExecution.setCategory(qbittorrentModel.getCategory());
-    filebotExecution.setAction(FilebotAction.COPY);
+    filebotExecution.setAction(FilebotAction.MOVE);
     if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
       filebotExecution.setEnglish(true);
     }
