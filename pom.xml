@@ -21,7 +21,6 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<project.scm.id>github</project.scm.id>
 	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>es.lavanda</groupId>
