@@ -2,6 +2,7 @@ package es.lavanda.filebot.executor.service.impl;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
+    // private final ExecutorService executorService =
+    // Executors.newFixedThreadPool(20);
     private final ExecutorService executorService;
 
     private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d file");
@@ -110,10 +113,11 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
     }
 
     // private void isNoProcessingFiles(String execution) {
-    //     Matcher matcherNoProcessedFiles = PATTERN_NO_PROCESSED_FILES.matcher(execution);
-    //     if (matcherNoProcessedFiles.find()) {
-    //         throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
-    //     }
+    // Matcher matcherNoProcessedFiles =
+    // PATTERN_NO_PROCESSED_FILES.matcher(execution);
+    // if (matcherNoProcessedFiles.find()) {
+    // throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
+    // }
     // }
 
     private void isChooseOptions(String execution) {
