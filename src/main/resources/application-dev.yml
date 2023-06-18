@@ -1,6 +1,6 @@
 spring:
     rabbitmq:
-        host: localhost
+        host: 192.168.3.150
         port: 5672
         username: user
         password: bitnami
@@ -16,7 +16,7 @@ spring:
         mongodb:
             authentication-database: admin
             database: lavanda
-            host: localhost
+            host: 192.168.3.150
             password: example
             port: 27017
             username: root

@@ -13,6 +13,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @Data
@@ -24,10 +26,7 @@ public class FilebotExecution implements Serializable {
     private String id;
 
     @Field("files")
-    private List<String> files = new ArrayList<>();
-
-    @Field("new_files")
-    private List<String> newFiles = new ArrayList<>();
+    private List<FileExecutor> files = new ArrayList<>();
 
     @Field("path")
     private String path;
@@ -76,5 +75,12 @@ public class FilebotExecution implements Serializable {
 
     public enum FilebotAction {
         COPY, MOVE;
+    }
+
+    @Data
+    @RequiredArgsConstructor
+    public static class FileExecutor {
+        private String file;
+        private String newFile;
     }
 }
