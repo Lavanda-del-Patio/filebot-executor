@@ -3,11 +3,11 @@ spring:
     name: lavanda-filebot-executor
   profiles:
     active: dev
-cloud:
-  aws:
-    stack:
-      auto: false
-    region:
-      static: eu-west-1
-    sns:
-      enabled: false    
+# cloud:
+#   aws:
+#     stack:
+#       auto: false
+#     region:
+#       static: eu-west-1
+#     sns:
+#       enabled: false    
