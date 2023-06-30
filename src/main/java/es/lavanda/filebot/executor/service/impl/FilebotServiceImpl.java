@@ -119,7 +119,7 @@ public class FilebotServiceImpl implements FilebotService {
             save(filebotExecution);
             completedFilebotExecution(filebotExecution, execution);
         } catch (FilebotAMCException e) {
-            filebotExecution.setLog(execution);//CAPturar exception
+            filebotExecution.setLog(execution);// CAPturar exception
             handleException(filebotExecution, e.getExecutionMessage(), e);
         }
     }
@@ -227,11 +227,12 @@ public class FilebotServiceImpl implements FilebotService {
         for (String content : groupContentList) {
             FileExecutor fileExecutor = new FileExecutor();
             fileExecutor.setFile(content);
+            filesExecutor.add(fileExecutor);
         }
         filebotExecution.setFiles(filesExecutor);
         FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
         filebotExecutionIDTO.setId(filebotExecution.getId());
-        filebotExecutionIDTO.setFiles(filesExecutor.stream().map(fe->fe.getFile()).collect(Collectors.toList()));
+        filebotExecutionIDTO.setFiles(filesExecutor.stream().map(fe -> fe.getFile()).collect(Collectors.toList()));
         filebotExecutionIDTO.setPath(filebotExecution.getPath().toString());
         producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
         filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM);
