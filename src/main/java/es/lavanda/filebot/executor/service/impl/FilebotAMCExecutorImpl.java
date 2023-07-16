@@ -55,22 +55,18 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
                     .start();
             StringBuilder sbuilder = new StringBuilder();
             StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
-                log.info("Filebot commandline: {}", line);
+                log.info("Filebot commandLine: {}", line);
                 sbuilder.append(line);
                 sbuilder.append("\n");
             });
             executorService.submit(streamGobbler);
             status = process.waitFor();
-            if (status != 0) {
-                log.error("Todo mal");
-            } else {
-                log.error("Todo bien");
-            }
+            log.info("Exit status: {}", status);
             return sbuilder;
         } catch (InterruptedException | IOException e) {
-            log.error("Exception on command line transcode", e);
+            log.error("Exception on Filebot commandLine", e);
             Thread.currentThread().interrupt();
-            throw new FilebotExecutorException("Exception on command line transcode", e);
+            throw new FilebotExecutorException("Exception on Filebot commandLine", e);
         }
     }
 
