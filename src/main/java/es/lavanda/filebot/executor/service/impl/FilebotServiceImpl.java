@@ -68,25 +68,19 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Override
     public void execute() {
-        Runnable runnableTask = () -> {
-
-            List<FilebotExecution> listOnFilebotExecution = filebotExecutionRepository
-                    .findByStatusIn(List.of(FilebotStatus.ON_FILEBOT_EXECUTION.name()));
-            if (listOnFilebotExecution.isEmpty()) {
-                List<FilebotExecution> listNotProcessed = filebotExecutionRepository
-                        .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
-                if (Boolean.FALSE.equals(listNotProcessed.isEmpty())) {
-                    try {
-                        executionWithCommand(listNotProcessed.iterator().next());
-                    } catch (Exception e) {
-                        log.error("Error executing filebot", e);
-                        throw e;
-                    }
+        List<FilebotExecution> filebotExecutionsNotProcessed = filebotExecutionRepository
+                .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
+        for (FilebotExecution filebotExecution : filebotExecutionsNotProcessed) {
+            Runnable runnableTask = () -> {
+                try {
+                    executionWithCommand(filebotExecution);
+                } catch (Exception e) {
+                    log.error("Error executing filebot", e);
+                    throw new RuntimeException("Error executing filebot", e);
                 }
-            }
-
-        };
-        executorService.execute(runnableTask);
+            };
+            executorService.execute(runnableTask);
+        }
     }
 
     @Override
@@ -105,7 +99,7 @@ public class FilebotServiceImpl implements FilebotService {
         }
     }
 
-    // EL PROBLEMA DEL LOG ESTÁ AQUI, SE VA POR LA EXPCEPTION
+    // FIXME: EL PROBLEMA DEL LOG ESTÁ AQUI, SE VA POR LA EXPCEPTION
     private void executionWithCommand(FilebotExecution filebotExecution) {
         log.info("On Execution With Command: {}", filebotExecution);
         String execution = null;
@@ -202,16 +196,6 @@ public class FilebotServiceImpl implements FilebotService {
             throw e;
         }
     }
-
-    // private void selectOptions(FilebotExecution filebotExecution, String string)
-    // {
-    // // FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
-    // // filebotExecutionIDTO.setId(filebotExecution.getId());
-    // // filebotExecutionIDTO.setFiles(filebotExecution.getFilesName());
-    // // filebotExecutionIDTO.setPath(filebotExecution.getFolderPath());
-    // // filebotExecution.setPossibilities(Arrays.asList(string.split("\n")));
-    // // producerService.sendFilebotExecution(filebotExecutionIDTO);
-    // }
 
     private void strictOrQuery(FilebotExecution filebotExecution, String execution) {
         Matcher matcherGroupContent = PATTERN_SELECT_CONTENT.matcher(execution);
