@@ -58,6 +58,12 @@ public class FilebotExecutorRestController {
         return ResponseEntity.ok(filebotExecutorService.getAllFiles());
     }
 
+    @PostMapping
+    public ResponseEntity<FilebotExecution> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
+        log.info("Received qbittorrentModel: {}", qbittorrentModel);
+        return ResponseEntity.ok(filebotExecutorService.createNewExecution(qbittorrentModel));
+    }
+
     @PostMapping("/execute")
     public ResponseEntity<?> execute() {
         log.info("Manual execution");
@@ -65,10 +71,11 @@ public class FilebotExecutorRestController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<FilebotExecution> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
-        log.info("Received qbittorrentModel: {}", qbittorrentModel);
-        return ResponseEntity.ok(filebotExecutorService.createNewExecution(qbittorrentModel));
+    @PostMapping("/execute/{id}")
+    public ResponseEntity<?> execute(@PathVariable String id) {
+        log.info("Manual execution for ID: {}", id);
+        filebotService.execute(id);
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @PatchMapping("/{id}")

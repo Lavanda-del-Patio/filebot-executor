@@ -1,5 +1,6 @@
 package es.lavanda.filebot.executor.exception;
 
+import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import lombok.Getter;
 
 @Getter
@@ -7,15 +8,14 @@ public class FilebotAMCException extends RuntimeException {
 
     private Type type;
 
-    private String executionMessage;
+    private FilebotCommandExecution filebotCommandExecution;
 
-    public FilebotAMCException(Type type, String executionMessage) {
-        super(executionMessage);
+    public FilebotAMCException(Type type, FilebotCommandExecution filebotCommandExecution) {
         this.type = type;
-        this.executionMessage = executionMessage;
+        this.filebotCommandExecution = filebotCommandExecution;
     }
 
     public enum Type {
-        STRICT_QUERY, REGISTER, SELECTED_OPTIONS, FILE_EXIST,FILES_NOT_FOUND;
+        STRICT_QUERY, REGISTER, SELECTED_OPTIONS, FILE_EXIST, FILES_NOT_FOUND;
     }
 }

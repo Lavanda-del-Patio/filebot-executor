@@ -48,7 +48,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
       // log.info("findAllByStatus");
       return filebotExecutionRepository.findAllByStatusOrderByLastModifiedAtDesc(pageable, status);
     }
-    log.info("findAllByOrderByLastModifiedAtDesc");
+    log.debug("findAllByOrderByLastModifiedAtDesc");
 
     return filebotExecutionRepository.findAllByOrderByLastModifiedAtDesc(pageable);
   }
