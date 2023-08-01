@@ -2,16 +2,14 @@ package es.lavanda.filebot.executor.service.impl;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-
 import es.lavanda.filebot.executor.exception.FilebotAMCException;
 import es.lavanda.filebot.executor.exception.FilebotAMCException.Type;
+import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
 import es.lavanda.filebot.executor.util.StreamGobbler;
@@ -23,32 +21,29 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
-    // private final ExecutorService executorService =
-    // Executors.newFixedThreadPool(20);
     private final ExecutorService executorService;
 
     private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d file");
 
-    private static final Pattern PATTERN_NO_PROCESSED_FILES = Pattern
-            .compile("Failed to identify or process any files");
-
-    private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
+    private static final Pattern PATTERN_FILES_NOT_FOUND = Pattern.compile("Exit status: 100");
 
     private static final Pattern PATTERN_NOT_FILE_SELECTED = Pattern.compile("No files selected for processing");
 
+    private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
+
     @Override
-    public String execute(String command) {
-        StringBuilder execution = filebotExecution(command);
-        isNotLicensed(execution.toString());
-        // isNoProcessingFiles(execution.toString());
-        isNoFilesSelected(execution.toString());
-        isNonStrictOrQuery(execution.toString());
-        isChooseOptions(execution.toString());
-        isFileExists(execution.toString());
-        return execution.toString();
+    public FilebotCommandExecution execute(String command) {
+        FilebotCommandExecution execution = filebotExecution(command);
+        isNotLicensed(execution);
+        // isNoProcessingFiles(execution);
+        isNoFilesSelected(execution);
+        isNonStrictOrQuery(execution);
+        isChooseOptions(execution);
+        isFileExists(execution);
+        return execution;
     }
 
-    private StringBuilder filebotExecution(String command) {
+    private FilebotCommandExecution filebotExecution(String command) {
         int status;
         try {
             Process process = new ProcessBuilder("bash", "-c", command).redirectErrorStream(true)
@@ -61,8 +56,11 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
             });
             executorService.submit(streamGobbler);
             status = process.waitFor();
+            FilebotCommandExecution filebotCommandExecution = new FilebotCommandExecution();
+            filebotCommandExecution.setExitStatus(status);
+            filebotCommandExecution.setLog(sbuilder.toString());
             log.info("Exit status: {}", status);
-            return sbuilder;
+            return filebotCommandExecution;
         } catch (InterruptedException | IOException e) {
             log.error("Exception on Filebot commandLine", e);
             Thread.currentThread().interrupt();
@@ -70,54 +68,47 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         }
     }
 
-    private void isNotLicensed(String execution) {
+    private void isNotLicensed(FilebotCommandExecution execution) {
         log.debug("Checking if is licensed");
-        if (execution.contains("License Error: UNREGISTERED")) {
+        if (execution.getLog().contains("License Error: UNREGISTERED")) {
             throw new FilebotAMCException(Type.REGISTER, execution);
         }
     }
 
-    private void isNoFilesSelected(String string) {
-        Matcher matcherNoFilesSelected = PATTERN_NOT_FILE_SELECTED.matcher(string);
-        if (matcherNoFilesSelected.find()) {
-            throw new FilebotAMCException(Type.FILES_NOT_FOUND, string);
+    private void isNoFilesSelected(FilebotCommandExecution execution) {
+        Matcher matcherNoFilesSelected = PATTERN_NOT_FILE_SELECTED.matcher(execution.getLog());
+        Matcher matcherFilesNotFound = PATTERN_FILES_NOT_FOUND.matcher(execution.getLog());
+        if (execution.getExitStatus() == 100 || matcherNoFilesSelected.find() || matcherFilesNotFound.find()) {
+            throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
         }
     }
 
-    private void isNonStrictOrQuery(String execution) {
-        if (execution.contains("Consider using -non-strict to enable opportunistic matching")
-                || execution.contains("No episode data found:")
+    private void isNonStrictOrQuery(FilebotCommandExecution execution) {
+        if (execution.getLog().contains("Consider using -non-strict to enable opportunistic matching")
+                || execution.getLog().contains("No episode data found:")
                 || (notContainsProcessedFile(execution)
-                        && execution.contains("Finished without processing any files"))) {
+                        && execution.getLog().contains("Finished without processing any files"))) {
             throw new FilebotAMCException(Type.STRICT_QUERY, execution);
         }
     }
 
-    private boolean notContainsProcessedFile(String execution) {
-        Matcher matcherMovedContent = PATTERN_PROCESSED_FILE.matcher(execution);
+    private boolean notContainsProcessedFile(FilebotCommandExecution execution) {
+        Matcher matcherMovedContent = PATTERN_PROCESSED_FILE.matcher(execution.getLog());
         if (!matcherMovedContent.find()) {
             return true;
         }
         return false;
     }
 
-    private void isFileExists(String execution) {
-        Matcher matcherMovedContent = PATTERN_FILE_EXISTS.matcher(execution);
+    private void isFileExists(FilebotCommandExecution execution) {
+        Matcher matcherMovedContent = PATTERN_FILE_EXISTS.matcher(execution.getLog());
         if (matcherMovedContent.find()) {
             throw new FilebotAMCException(Type.FILE_EXIST, execution);
         }
     }
 
-    // private void isNoProcessingFiles(String execution) {
-    // Matcher matcherNoProcessedFiles =
-    // PATTERN_NO_PROCESSED_FILES.matcher(execution);
-    // if (matcherNoProcessedFiles.find()) {
-    // throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
-    // }
-    // }
-
-    private void isChooseOptions(String execution) {
-        if (execution.contains("XXXX")) {
+    private void isChooseOptions(FilebotCommandExecution execution) {
+        if (execution.getLog().contains("XXXX")) {
             throw new FilebotAMCException(Type.SELECTED_OPTIONS, execution);
         }
     }

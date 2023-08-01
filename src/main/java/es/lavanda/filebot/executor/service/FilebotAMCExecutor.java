@@ -1,7 +1,9 @@
 package es.lavanda.filebot.executor.service;
 
+import es.lavanda.filebot.executor.model.FilebotCommandExecution;
+
 public interface FilebotAMCExecutor {
 
-    String execute(String command);
+    FilebotCommandExecution execute(String command);
 
 }

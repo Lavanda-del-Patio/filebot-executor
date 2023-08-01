@@ -7,6 +7,7 @@ public interface FilebotService {
 
     void execute();
 
+    void execute(String id);
 
     void resolution(FilebotExecutionODTO filebotExecutionODTO);
 
