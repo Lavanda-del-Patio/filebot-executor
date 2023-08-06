@@ -316,27 +316,38 @@ public class FilebotServiceImpl implements FilebotService {
         List<QbittorrentInfo> qbittorrentsInfo;
         try {
             qbittorrentsInfo = qBittorrentService.getCompletedTorrents();
-            List<FilebotExecution> filebotExecutions = filebotExecutionRepository.findAll();
-            List<String> existingPaths = filebotExecutions.stream()
-                    .map(fe -> filebotUtils.getFilebotPathInput() + "/" + fe.getPath())
-                    .collect(Collectors.toList());
+            // List<FilebotExecution> filebotExecutions = filebotExecutionRepository.findAll();
+            // List<String> existingPaths = filebotExecutions.stream()
+            //         .map(fe -> filebotUtils.getFilebotPathInput() + "/" + fe.getPath())
+            //         .collect(Collectors.toList());
             for (QbittorrentInfo qbittorrentInfo : qbittorrentsInfo) {
-                String name = qbittorrentInfo.getContentPath().substring(qbittorrentInfo.getSavePath().length())
-                        .replaceFirst("^/+", "");
-                if (Boolean.FALSE.equals(existingPaths.contains(name))) {
+                String name = getIntermediate(qbittorrentInfo.getContentPath(),qbittorrentInfo.getSavePath());
+                // if (Boolean.FALSE.equals(existingPaths.contains(name))) {
                     QbittorrentModel qbittorrentModel = new QbittorrentModel();
                     qbittorrentModel.setAction(FilebotAction.MOVE.name());
                     qbittorrentModel.setCategory(qbittorrentInfo.getCategory());
                     qbittorrentModel.setId(UUID.randomUUID().toString());
                     qbittorrentModel.setName(Path.of(filebotUtils.getFilebotPathInput() + "/" + name));
                     filebotExecutorService.createNewExecution(qbittorrentModel);
-                }
+                // }
             }
         } catch (IOException e) {
             log.error("Can not get completed torrents", e);
             throw new FilebotExecutorException("Can not get completed torrents", e);
         }
         // execute();
+    }
+
+    private String getIntermediate(String contentPath, String savePath) {
+        // Eliminamos el save_path de content_path
+        String intermediatePath = contentPath.substring(savePath.length()).replaceFirst("^/+", "");
+
+        // Eliminamos el último segmento
+        int lastIndex = intermediatePath.lastIndexOf('/');
+        if (lastIndex > 0) {
+            intermediatePath = intermediatePath.substring(0, lastIndex);
+        }
+        return intermediatePath;
     }
 
 }
