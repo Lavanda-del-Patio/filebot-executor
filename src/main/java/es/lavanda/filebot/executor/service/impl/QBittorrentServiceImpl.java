@@ -3,6 +3,7 @@ package es.lavanda.filebot.executor.service.impl;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -20,7 +21,10 @@ import okhttp3.Response;
 @Service
 public class QBittorrentServiceImpl implements QBittorrentService {
     private final OkHttpClient client = new OkHttpClient();
-    private final String QB_URL = "http://localhost:8081";
+
+    @Value("${qbittorrent.url}")
+    private String QB_URL;
+
     private final String API_ENDPOINT = "/api/v2/torrents/info";
     private final String STATUS_COMPLETED = "completed";
 
