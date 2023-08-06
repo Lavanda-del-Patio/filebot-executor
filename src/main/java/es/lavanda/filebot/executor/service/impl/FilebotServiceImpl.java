@@ -313,27 +313,30 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Override
     public void checkNewCompleted() {
-        List<QbittorrentInfo> qbittorrentsInfo;
+        List<QbittorrentModel> qbittorrentModels = new ArrayList<>();
         try {
-            qbittorrentsInfo = qBittorrentService.getCompletedTorrents();
-            // List<FilebotExecution> filebotExecutions = filebotExecutionRepository.findAll();
+            List<QbittorrentInfo> qbittorrentsInfo = qBittorrentService.getCompletedTorrents();
+            // List<FilebotExecution> filebotExecutions =
+            // filebotExecutionRepository.findAll();
             // List<String> existingPaths = filebotExecutions.stream()
-            //         .map(fe -> filebotUtils.getFilebotPathInput() + "/" + fe.getPath())
-            //         .collect(Collectors.toList());
+            // .map(fe -> filebotUtils.getFilebotPathInput() + "/" + fe.getPath())
+            // .collect(Collectors.toList());
             for (QbittorrentInfo qbittorrentInfo : qbittorrentsInfo) {
-                String name = getIntermediate(qbittorrentInfo.getContentPath(),qbittorrentInfo.getSavePath());
+                String name = getIntermediate(qbittorrentInfo.getContentPath(), qbittorrentInfo.getSavePath());
                 // if (Boolean.FALSE.equals(existingPaths.contains(name))) {
-                    QbittorrentModel qbittorrentModel = new QbittorrentModel();
-                    qbittorrentModel.setAction(FilebotAction.MOVE.name());
-                    qbittorrentModel.setCategory(qbittorrentInfo.getCategory());
-                    qbittorrentModel.setId(UUID.randomUUID().toString());
-                    qbittorrentModel.setName(Path.of(filebotUtils.getFilebotPathInput() + "/" + name));
-                    filebotExecutorService.createNewExecution(qbittorrentModel);
+                QbittorrentModel qbittorrentModel = new QbittorrentModel();
+                qbittorrentModel.setAction(FilebotAction.MOVE.name());
+                qbittorrentModel.setCategory(qbittorrentInfo.getCategory());
+                qbittorrentModel.setId(UUID.randomUUID().toString());
+                qbittorrentModel.setName(Path.of(filebotUtils.getFilebotPathInput() + "/" + name));
+                qbittorrentModels.add(qbittorrentModel);
                 // }
             }
         } catch (IOException e) {
             log.error("Can not get completed torrents", e);
-            throw new FilebotExecutorException("Can not get completed torrents", e);
+        }
+        for (QbittorrentModel qbittorrentModel : qbittorrentModels) {
+            filebotExecutorService.createNewExecution(qbittorrentModel);
         }
         // execute();
     }
