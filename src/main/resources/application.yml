@@ -3,6 +3,8 @@ spring:
     name: lavanda-filebot-executor
   profiles:
     active: dev
+qbittorrent:
+  url: http://localhost:8081
 # cloud:
 #   aws:
 #     stack:
