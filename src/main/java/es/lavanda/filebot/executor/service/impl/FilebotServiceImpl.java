@@ -336,7 +336,7 @@ public class FilebotServiceImpl implements FilebotService {
             log.error("Can not get completed torrents", e);
             throw new FilebotExecutorException("Can not get completed torrents", e);
         }
-        execute();
+        // execute();
     }
 
 }
