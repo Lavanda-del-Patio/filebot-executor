@@ -5,6 +5,8 @@ import es.lavanda.lib.common.model.FilebotExecutionODTO;
 
 public interface FilebotService {
 
+    void checkNewCompleted();
+
     void execute();
 
     void execute(String id);

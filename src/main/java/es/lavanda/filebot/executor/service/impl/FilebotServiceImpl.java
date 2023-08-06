@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,13 +23,17 @@ import es.lavanda.filebot.executor.exception.FilebotAMCException;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import es.lavanda.filebot.executor.model.FilebotExecution;
+import es.lavanda.filebot.executor.model.QbittorrentInfo;
+import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.model.FilebotExecution.FileExecutor;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
+import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.service.FilebotService;
+import es.lavanda.filebot.executor.service.QBittorrentService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
@@ -56,6 +61,12 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Autowired
     private FilebotAMCExecutor filebotAMCExecutor;
+
+    @Autowired
+    private FilebotExecutorService filebotExecutorService;
+
+    @Autowired
+    private QBittorrentService qBittorrentService;
 
     @Autowired
     private FilebotUtils filebotUtils;
@@ -297,6 +308,34 @@ public class FilebotServiceImpl implements FilebotService {
             fileService.rmdir(filebotExecution.getPath().toString());
         }
         save(filebotExecution);
+        execute();
+    }
+
+    @Override
+    public void checkNewCompleted() {
+        List<QbittorrentInfo> qbittorrentsInfo;
+        try {
+            qbittorrentsInfo = qBittorrentService.getCompletedTorrents();
+            List<FilebotExecution> filebotExecutions = filebotExecutionRepository.findAll();
+            List<String> existingPaths = filebotExecutions.stream()
+                    .map(fe -> filebotUtils.getFilebotPathInput() + "/" + fe.getPath())
+                    .collect(Collectors.toList());
+            for (QbittorrentInfo qbittorrentInfo : qbittorrentsInfo) {
+                String name = qbittorrentInfo.getContentPath().substring(qbittorrentInfo.getSavePath().length())
+                        .replaceFirst("^/+", "");
+                if (Boolean.FALSE.equals(existingPaths.contains(name))) {
+                    QbittorrentModel qbittorrentModel = new QbittorrentModel();
+                    qbittorrentModel.setAction(FilebotAction.MOVE.name());
+                    qbittorrentModel.setCategory(qbittorrentInfo.getCategory());
+                    qbittorrentModel.setId(UUID.randomUUID().toString());
+                    qbittorrentModel.setName(Path.of(filebotUtils.getFilebotPathInput() + "/" + name));
+                    filebotExecutorService.createNewExecution(qbittorrentModel);
+                }
+            }
+        } catch (IOException e) {
+            log.error("Can not get completed torrents", e);
+            throw new FilebotExecutorException("Can not get completed torrents", e);
+        }
         execute();
     }
 
