@@ -81,7 +81,8 @@ public class FilebotServiceImpl implements FilebotService {
     @Override
     public void execute() {
         List<FilebotExecution> filebotExecutionsNotProcessed = filebotExecutionRepository
-                .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
+                .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name(),
+                        FilebotStatus.FILES_NOT_FOUND.name()));
         for (FilebotExecution filebotExecution : filebotExecutionsNotProcessed) {
             Runnable runnableTask = () -> {
                 try {
@@ -305,7 +306,8 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
         filebotExecution.setLog(execution.getLog());
         if (FilebotAction.MOVE.equals(filebotExecution.getAction())) {
-            //TODO: SEND MESSAGE TO TELEGRAM TO CONFIRM DELETE WITH LS TO SEE THE FILES TO DELETE
+            // TODO: SEND MESSAGE TO TELEGRAM TO CONFIRM DELETE WITH LS TO SEE THE FILES TO
+            // DELETE
             // fileService.rmdir(filebotExecution.getPath().toString());
         }
         save(filebotExecution);
@@ -336,7 +338,12 @@ public class FilebotServiceImpl implements FilebotService {
             log.error("Can not get completed torrents", e);
         }
         for (QbittorrentModel qbittorrentModel : qbittorrentModels) {
-            filebotExecutorService.createNewExecution(qbittorrentModel);
+            try {
+                filebotExecutorService.createNewExecution(qbittorrentModel);
+
+            } catch (FilebotExecutorException e) {
+                log.debug("Error creating new execution: {}", qbittorrentModel, e);
+            }
         }
         // execute();
     }
