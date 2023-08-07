@@ -56,7 +56,7 @@ public class FileServiceImpl implements FileService {
         int status;
         List<String> lsResult = new ArrayList<>();
         try {
-            Process process = new ProcessBuilder("bash", "-c", "rmdir \"" + path + "\"").redirectErrorStream(true)
+            Process process = new ProcessBuilder("bash", "-c", "rmdir -r\"" + path + "\"").redirectErrorStream(true)
                     .start();
             StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
                 // log.info("BASH commandline: {}", line);

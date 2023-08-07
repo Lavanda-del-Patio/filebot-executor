@@ -57,7 +57,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
   public FilebotExecution createNewExecution(QbittorrentModel qbittorrentModel) {
     log.info("Going to create new Filebot Execution about torrent id {} and name {}", qbittorrentModel.getId(),
         qbittorrentModel.getName());
-    if (filebotExecutionRepository.findByPath(qbittorrentModel.getName().toString()).isPresent()) {
+    if (filebotExecutionRepository.findByName(qbittorrentModel.getName()).isPresent()) {
       log.info("Already exists {} // {}", qbittorrentModel.getId(),
           qbittorrentModel.getName());
       throw new FilebotExecutorException("FilebotExecution already exists");

@@ -1,7 +1,5 @@
 package es.lavanda.filebot.executor.model;
 
-import java.nio.file.Path;
-
 import lombok.Data;
 
 @Data
