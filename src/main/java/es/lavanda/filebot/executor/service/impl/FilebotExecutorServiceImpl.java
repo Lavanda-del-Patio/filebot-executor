@@ -66,6 +66,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
           qbittorrentModel.getName());
       FilebotExecution filebotExecution = new FilebotExecution();
       filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
+      filebotExecution.setName(qbittorrentModel.getName());
       filebotExecution.setCategory(qbittorrentModel.getCategory());
       filebotExecution.setAction(Objects.isNull(qbittorrentModel.getAction()) ? FilebotAction.MOVE
           : FilebotAction.valueOf(qbittorrentModel.getAction()));
