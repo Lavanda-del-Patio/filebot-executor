@@ -28,6 +28,8 @@ public class FilebotExecution implements Serializable {
     @Field("files")
     private List<FileExecutor> files = new ArrayList<>();
 
+    private String name;
+
     @Field("path")
     private String path;
 

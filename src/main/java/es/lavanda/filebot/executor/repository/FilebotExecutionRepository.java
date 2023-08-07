@@ -10,14 +10,13 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
 @Repository
 public interface FilebotExecutionRepository extends MongoRepository<FilebotExecution, String> {
 
-    boolean existsByPath(String folderPath);
+    boolean existsByName(String name);
 
-    Optional<FilebotExecution> findByPath(String folderPath);
+    Optional<FilebotExecution> findByName(String name);
 
     Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
 

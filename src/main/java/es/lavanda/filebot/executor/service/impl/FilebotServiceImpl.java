@@ -305,10 +305,10 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
         filebotExecution.setLog(execution.getLog());
         if (FilebotAction.MOVE.equals(filebotExecution.getAction())) {
-            fileService.rmdir(filebotExecution.getPath().toString());
+            //TODO: SEND MESSAGE TO TELEGRAM TO CONFIRM DELETE WITH LS TO SEE THE FILES TO DELETE
+            // fileService.rmdir(filebotExecution.getPath().toString());
         }
         save(filebotExecution);
-        execute();
     }
 
     @Override
