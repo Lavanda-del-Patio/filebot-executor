@@ -81,8 +81,7 @@ public class FilebotServiceImpl implements FilebotService {
     @Override
     public void execute() {
         List<FilebotExecution> filebotExecutionsNotProcessed = filebotExecutionRepository
-                .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name(),
-                        FilebotStatus.FILES_NOT_FOUND.name()));
+                .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
         for (FilebotExecution filebotExecution : filebotExecutionsNotProcessed) {
             Runnable runnableTask = () -> {
                 try {
