@@ -328,7 +328,7 @@ public class FilebotServiceImpl implements FilebotService {
                 qbittorrentModel.setAction(FilebotAction.MOVE.name());
                 qbittorrentModel.setCategory(qbittorrentInfo.getCategory());
                 qbittorrentModel.setId(UUID.randomUUID().toString());
-                qbittorrentModel.setName(Path.of(filebotUtils.getFilebotPathInput() + "/" + name));
+                qbittorrentModel.setName(name);
                 qbittorrentModels.add(qbittorrentModel);
                 // }
             }

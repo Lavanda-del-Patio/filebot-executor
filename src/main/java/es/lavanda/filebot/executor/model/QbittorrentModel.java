@@ -11,7 +11,7 @@ public class QbittorrentModel {
 
     private String category;
 
-    private Path name;
+    private String name;
 
     private String action;
 
