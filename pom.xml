@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-executor</artifactId>
-	<version>0.0.96</version>
+	<version>0.0.97-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-executor</name>
@@ -99,7 +99,7 @@
 				</executions>
 				<configuration>
 					<from>
-						<image>lavandadelpatio/java17-filebot:1.0.0</image>
+						<image>lavandadelpatio/java21-filebot:1.0.0</image>
 						<platforms>
 							<platform>
 								<architecture>amd64</architecture>
