@@ -13,6 +13,8 @@ public class ScheduleService {
 
     private final FilebotService filebotService;
 
+    private final FilebotExecutorService filebotExecutorService;
+
     @Scheduled(cron = "0 0 * * * *")
     // @Scheduled(fixedDelay = 60000)
     public void executeSchedule() {
@@ -21,8 +23,8 @@ public class ScheduleService {
 
     @Scheduled(cron = "0 0/15 * * * *")
     // @Scheduled(fixedDelay = 60000)
-    public void executeScheduleForNewTorrentsCompleted() {
-        filebotService.checkNewCompleted();
+    public void checkPossiblesNewFilebotExecution() {
+        filebotExecutorService.checkPossiblesNewFilebotExecution();
     }
 
 }

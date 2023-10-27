@@ -18,6 +18,8 @@ public interface FilebotExecutionRepository extends MongoRepository<FilebotExecu
 
     Optional<FilebotExecution> findByName(String name);
 
+    Optional<FilebotExecution> findByPath(String path);
+
     Page<FilebotExecution> findAllByOrderByLastModifiedAtDesc(Pageable pageable);
 
     Page<FilebotExecution> findAllByStatusAndPathContainingIgnoreCaseOrderByLastModifiedAtDesc(Pageable pageable, String status, String path);

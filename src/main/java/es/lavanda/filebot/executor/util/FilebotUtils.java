@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
+import es.lavanda.lib.common.model.filebot.FilebotAction;
 import lombok.extern.slf4j.Slf4j;
 
 @Component

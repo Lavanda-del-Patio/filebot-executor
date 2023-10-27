@@ -24,19 +24,18 @@ import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.model.QbittorrentInfo;
-import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.model.FilebotExecution.FileExecutor;
-import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.service.FilebotService;
-import es.lavanda.filebot.executor.service.QBittorrentService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
+import es.lavanda.lib.common.model.QbittorrentModel;
+import es.lavanda.lib.common.model.filebot.FilebotAction;
 // import es.lavanda.lib.common.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,9 +65,6 @@ public class FilebotServiceImpl implements FilebotService {
     private FilebotExecutorService filebotExecutorService;
 
     @Autowired
-    private QBittorrentService qBittorrentService;
-
-    @Autowired
     private FilebotUtils filebotUtils;
 
     private static final Pattern PATTERN_SELECT_CONTENT = Pattern.compile("Group:.*=> \\[(.*)\\]");
@@ -96,7 +92,7 @@ public class FilebotServiceImpl implements FilebotService {
     }
 
     @Override
-    public void resolution(FilebotExecutionODTO filebotExecutionODTO) {
+    public void resolutionTelegramBot(FilebotExecutionODTO filebotExecutionODTO) {
         log.info("Resolution: {}", filebotExecutionODTO);
         Optional<FilebotExecution> optFilebotExecution = filebotExecutionRepository
                 .findById(filebotExecutionODTO.getId());
@@ -264,20 +260,6 @@ public class FilebotServiceImpl implements FilebotService {
         return filebotExecutionRepository.save(filebotExecution);
     }
 
-    // private List<Path> getAllFilesFounded(String path) {
-    // log.info("All files founded method");
-    // try (Stream<Path> walk = Files.walk(Paths.get(path), 1)) {
-    // List<Path> paths = walk.filter(Files::isDirectory)
-    // .collect(Collectors.toList());
-    // paths.remove(0);
-    // return paths;
-    // } catch (IOException e) {
-    // log.error("Can not access to path {}", filebotUtils.getFilebotPathInput(),
-    // e);
-    // throw new FilebotExecutorException("Can not access to path", e);
-    // }
-    // }
-
     private void completedFilebotExecution(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
         log.info("CompletedFilebotExecution {}", execution);
         Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution.getLog());
@@ -310,53 +292,6 @@ public class FilebotServiceImpl implements FilebotService {
             // fileService.rmdir(filebotExecution.getPath().toString());
         }
         save(filebotExecution);
-    }
-
-    @Override
-    public void checkNewCompleted() {
-        List<QbittorrentModel> qbittorrentModels = new ArrayList<>();
-        try {
-            List<QbittorrentInfo> qbittorrentsInfo = qBittorrentService.getCompletedTorrents();
-            // List<FilebotExecution> filebotExecutions =
-            // filebotExecutionRepository.findAll();
-            // List<String> existingPaths = filebotExecutions.stream()
-            // .map(fe -> filebotUtils.getFilebotPathInput() + "/" + fe.getPath())
-            // .collect(Collectors.toList());
-            for (QbittorrentInfo qbittorrentInfo : qbittorrentsInfo) {
-                String name = getIntermediate(qbittorrentInfo.getContentPath(), qbittorrentInfo.getSavePath());
-                // if (Boolean.FALSE.equals(existingPaths.contains(name))) {
-                QbittorrentModel qbittorrentModel = new QbittorrentModel();
-                qbittorrentModel.setAction(FilebotAction.MOVE.name());
-                qbittorrentModel.setCategory(qbittorrentInfo.getCategory());
-                qbittorrentModel.setId(UUID.randomUUID().toString());
-                qbittorrentModel.setName(name);
-                qbittorrentModels.add(qbittorrentModel);
-                // }
-            }
-        } catch (IOException e) {
-            log.error("Can not get completed torrents", e);
-        }
-        for (QbittorrentModel qbittorrentModel : qbittorrentModels) {
-            try {
-                filebotExecutorService.createNewExecution(qbittorrentModel);
-
-            } catch (FilebotExecutorException e) {
-                log.debug("Error creating new execution: {}", qbittorrentModel, e);
-            }
-        }
-        // execute();
-    }
-
-    private String getIntermediate(String contentPath, String savePath) {
-        // Eliminamos el save_path de content_path
-        String intermediatePath = contentPath.substring(savePath.length()).replaceFirst("^/+", "");
-
-        // Eliminamos el último segmento
-        int lastIndex = intermediatePath.lastIndexOf('/');
-        if (lastIndex > 0) {
-            intermediatePath = intermediatePath.substring(0, lastIndex);
-        }
-        return intermediatePath;
     }
 
 }

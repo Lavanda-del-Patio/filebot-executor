@@ -13,7 +13,6 @@ import es.lavanda.lib.common.config.CommonConfigurator;
 
 @Configuration
 @EnableMongoAuditing
-@Import(CommonConfigurator.class)
 @EnableAutoConfiguration
 public class AppBeans {
 
