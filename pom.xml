@@ -99,7 +99,7 @@
 				</executions>
 				<configuration>
 					<from>
-						<image>lavandadelpatio/java17-filebot:1.0.0</image>
+						<image>lavandadelpatio/java21-filebot:1.0.0</image>
 						<platforms>
 							<platform>
 								<architecture>amd64</architecture>
