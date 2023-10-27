@@ -11,15 +11,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import es.lavanda.filebot.executor.amqp.ProducerService;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotExecution;
-import es.lavanda.filebot.executor.model.FilebotExecution.FilebotAction;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
-import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
+import es.lavanda.lib.common.model.QbittorrentModel;
+import es.lavanda.lib.common.model.filebot.FilebotAction;
+import es.lavanda.lib.common.model.filebot.FilebotCategory;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -34,6 +36,9 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
 
   @Autowired
   private FileService fileServiceImpl;
+
+  @Autowired
+  private ProducerService producerService;
 
   @Override
   public Page<FilebotExecution> getAllPageable(Pageable pageable, String status, String path) {
@@ -68,15 +73,29 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
       filebotExecution.setPath(filebotUtils.getFilebotPathInput() + "/" + qbittorrentModel.getName().toString());
       filebotExecution.setName(qbittorrentModel.getName());
       filebotExecution.setCategory(qbittorrentModel.getCategory());
-      filebotExecution.setAction(Objects.isNull(qbittorrentModel.getAction()) ? FilebotAction.MOVE
-          : FilebotAction.valueOf(qbittorrentModel.getAction()));
-      if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
+      filebotExecution.setAction(qbittorrentModel.getAction());
+      if (filebotExecution.getCategory().equals(FilebotCategory.TV_EN)) {
         filebotExecution.setEnglish(true);
       }
       filebotExecution
           .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
               filebotExecution.isEnglish(), filebotExecution.getAction()));
       return filebotExecutionRepository.save(filebotExecution);
+    }
+  }
+
+  @Override
+  public void checkPossiblesNewFilebotExecution() {
+    List<String> files = getAllFilesInput();
+    for (String file : files) {
+      if (filebotExecutionRepository.findByName(file).isPresent()) {
+        log.info("Already exists {}", file);
+      } else {
+        log.info("Asking for new execution {}", file);
+        QbittorrentModel qbittorrentModel = new QbittorrentModel();
+        qbittorrentModel.setName(file);
+        producerService.createNewExecution(qbittorrentModel);
+      }
     }
   }
 
@@ -103,7 +122,9 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
         fe.setPath(filebotUtils.getFilebotPathInput() + "/" + filebotExecution.getPath());
       }
       fe.setCategory(filebotExecution.getCategory());
-      fe.setEnglish(fe.getCategory().equalsIgnoreCase("tv-sonarr-en") ? true : false);
+      if (filebotExecution.getCategory().equals(FilebotCategory.TV_EN)) {
+        fe.setEnglish(true);
+      }
       fe.setAction(filebotExecution.getAction());
       fe.setCommand(Objects.nonNull(filebotExecution.getCommand()) ? filebotExecution.getCommand()
           : filebotUtils.getFilebotCommand(Path.of(fe.getPath()), null,
@@ -127,62 +148,12 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
     return getAllFilesInput();
   }
 
-  // @Override
-  // public void createBatchExecutionForMovie() {
-  // // for (String folderMovie : getAllFiles("/")) {
-  // List<String> allFiles = getAllFilesOutput("/PeliculasToOrdered");
-  // int min = 0;
-  // int max = allFiles.size();
-  // int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-  // for (int i = 0; i < 40; i++) {
-  // createNewExecution(allFiles.get(i), "radarr", "/PeliculasToOrdered");
-  // }
-  // }
-
-  // @Override
-  // public void createBatchExecutionForShow() {
-  // // for (String folderMovie : getAllFiles("/")) {
-  // List<String> allFiles = getAllFilesOutput("/SeriesToOrdered");
-  // int min = 0;
-  // int max = allFiles.size();
-  // int selectedFolder = (int) (Math.random() * (max - min + 1) + min);
-  // for (String file : allFiles) {
-  // createNewExecution(file, "tv-sonarr", "/SeriesToOrdered");
-  // }
-  // // createNewExecution(allFiles.get(selectedFolder), "tv-sonarr",
-  // "/SeriesToOrdered");
-  // // }
-  // }
-
-  // private List<String> getAllFilesOutput(String path) {
-  // return fileServiceImpl.ls(filebotUtils.getFilebotPathOutput() + path);
-  // }
-
   private List<String> getAllFilesInput() {
     return fileServiceImpl.ls(filebotUtils.getFilebotPathInput());
   }
 
-  // private FilebotExecution createNewExecution(String path, String category,
-  // String folderPathForInput) {
-  // log.info("Creating new manual Filebot Execution about torrent path {} name",
-  // path);
-  // if (filebotExecutionRepository.findByPath(path).isPresent()) {
-  // throw new FilebotExecutorException("FilebotExecution already exists");
-  // }
-  // FilebotExecution filebotExecution = new FilebotExecution();
-  // filebotExecution.setPath(filebotUtils.getFilebotPathOutput() +
-  // folderPathForInput + "/" + path);
-  // filebotExecution.setCategory(category);
-  // filebotExecution.setAction(FilebotAction.MOVE);
-  // filebotExecution.setManual(true);
-  // if (filebotExecution.getCategory().equalsIgnoreCase("tv-sonarr-en")) {
-  // filebotExecution.setEnglish(true);
-  // }
-  // filebotExecution
-  // .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()),
-  // null, null, false,
-  // filebotExecution.isEnglish(), filebotExecution.getAction()));
-  // return filebotExecutionRepository.save(filebotExecution);
-  // }
-
+  @Override
+  public void resolutionQbittorrentModel(QbittorrentModel qbittorrentModel) {
+    createNewExecution(qbittorrentModel);
+  }
 }

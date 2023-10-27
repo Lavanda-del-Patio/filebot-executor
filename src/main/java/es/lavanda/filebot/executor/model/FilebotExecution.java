@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import es.lavanda.lib.common.model.filebot.FilebotAction;
+import es.lavanda.lib.common.model.filebot.FilebotCategory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +38,14 @@ public class FilebotExecution implements Serializable {
     @Field("new_path")
     private String newPath;
 
-    @Field("category")
-    private String category;
-
     @Field("command")
     private String command;
 
     @Field("english")
     private boolean english;
+
+    @Field("category")
+    private FilebotCategory category;
 
     @Field("action")
     private FilebotAction action = FilebotAction.COPY;
@@ -73,10 +75,6 @@ public class FilebotExecution implements Serializable {
         UNPROCESSED, ON_TELEGRAM, PENDING, ON_FILEBOT_EXECUTION, PROCESSED, FILES_EXISTED_IN_DESTINATION, ERROR,
         FILES_NOT_FOUND;
 
-    }
-
-    public enum FilebotAction {
-        COPY, MOVE;
     }
 
     @Data
