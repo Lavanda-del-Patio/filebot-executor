@@ -35,11 +35,11 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
     public FilebotCommandExecution execute(String command) {
         FilebotCommandExecution execution = filebotExecution(command);
         isNotLicensed(execution);
-        // isNoProcessingFiles(execution);
-        isNoFilesSelected(execution);
         isNonStrictOrQuery(execution);
+        isNoFilesSelected(execution);
         isChooseOptions(execution);
         isFileExists(execution);
+        isError(execution);
         return execution;
     }
 
@@ -93,6 +93,13 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
                         && execution.getLog().contains("Finished without processing any files"))) {
             throw new FilebotAMCException(Type.STRICT_QUERY, execution);
         }
+    }
+
+    private void isError(FilebotCommandExecution execution) {
+        if (execution.getExitStatus() == 3) {
+            throw new FilebotAMCException(Type.ERROR, execution);
+        }
+
     }
 
     private boolean notContainsProcessedFile(FilebotCommandExecution execution) {

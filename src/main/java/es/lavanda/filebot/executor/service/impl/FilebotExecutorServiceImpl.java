@@ -20,7 +20,6 @@ import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.QbittorrentModel;
-import es.lavanda.lib.common.model.filebot.FilebotAction;
 import es.lavanda.lib.common.model.filebot.FilebotCategory;
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,7 +77,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
         filebotExecution.setEnglish(true);
       }
       filebotExecution
-          .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
+          .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, true,
               filebotExecution.isEnglish(), filebotExecution.getAction()));
       return filebotExecutionRepository.save(filebotExecution);
     }
