@@ -15,7 +15,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import es.lavanda.lib.common.model.filebot.FilebotAction;
 import es.lavanda.lib.common.model.filebot.FilebotCategory;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
