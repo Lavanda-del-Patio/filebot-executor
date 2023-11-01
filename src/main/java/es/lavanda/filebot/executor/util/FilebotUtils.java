@@ -31,7 +31,8 @@ public class FilebotUtils {
                 getFilebotPathData().trim() + "/license.psm";
     }
 
-    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english, FilebotAction action) {
+    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english,
+            FilebotAction action) {
         log.info("FOLDER PATH {}", folderPath);
         String queryFilled = "";
         String nonStrict = "";
@@ -94,7 +95,8 @@ public class FilebotUtils {
     }
 
     private enum Constants {
-        MOVIES_FORMAT(" 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})/{n} ({y})_{audioLanguages}_{vf}_{bitrate}' "),
+        MOVIES_FORMAT(
+                " 'movieFormat=FILEBOT_PATH_OUTPUT/Peliculas/{n} ({y})/{n} ({y})_{audioLanguages}_{vf}_{bitrate}' "),
         SHOWS_FORMAT(
                 " 'seriesFormat=FILEBOT_PATH_OUTPUT/Series/{n}/ Season {s}/{n} s{s.pad(2)}e{e.pad(2)}_{audioLanguages}_{vf}_{bitrate}' "),
         SHOWS_EN_FORMAT(
@@ -144,7 +146,4 @@ public class FilebotUtils {
         return Constants.OUTPUT_FORMAT.toString().replace("FILEBOT_PATH_OUTPUT", FILEBOT_PATH_OUTPUT);
     }
 
-    private String getExcludeList() {
-        return Constants.EXCLUDE_LIST.toString().replace("FILEBOT_PATH_DATA", FILEBOT_PATH_DATA);
-    }
 }
