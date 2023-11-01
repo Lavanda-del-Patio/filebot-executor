@@ -122,7 +122,7 @@
 							<PGID>568</PGID>
 							<PGUSER>apps</PGUSER>
 							<PGROUP>apps</PGROUP>
-							<HOME>/home/filebot</HOME>
+							<HOME>/home/apps</HOME>
 						</environment>
 					</container>
 				</configuration>
