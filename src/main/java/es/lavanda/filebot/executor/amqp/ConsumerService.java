@@ -3,8 +3,6 @@ package es.lavanda.filebot.executor.amqp;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
-import es.lavanda.filebot.executor.exception.FilebotAMCException;
-import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
