@@ -118,10 +118,10 @@
 					<container>
 						<environment>
 							<TZ>Europe/Madrid</TZ>
-							<PUID>1000</PUID>
-							<PGID>1000</PGID>
-							<PGUSER>filebot</PGUSER>
-							<PGROUP>filebot</PGROUP>
+							<PUID>568</PUID>
+							<PGID>568</PGID>
+							<PGUSER>apps</PGUSER>
+							<PGROUP>apps</PGROUP>
 							<HOME>/home/filebot</HOME>
 						</environment>
 					</container>
