@@ -17,8 +17,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>21</java.version>
-		<maven.compiler.target>21</maven.compiler.target>
+		<java.version>17</java.version>
+		<maven.compiler.target>17</maven.compiler.target>
 		<project.scm.id>github</project.scm.id>
 	</properties>
 	<dependencies>
@@ -99,7 +99,7 @@
 				</executions>
 				<configuration>
 					<from>
-						<image>lavandadelpatio/java21-filebot:1.0.0</image>
+						<image>lavandadelpatio/java17-filebot:1.0.0</image>
 						<platforms>
 							<platform>
 								<architecture>amd64</architecture>
