@@ -15,6 +15,6 @@ public class AppBeans {
 
     @Bean
     public ExecutorService executorServiceBean() {
-        return Executors.newFixedThreadPool(2);
+        return Executors.newFixedThreadPool(1);
     }
 }
