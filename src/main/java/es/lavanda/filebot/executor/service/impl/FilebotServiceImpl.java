@@ -1,42 +1,30 @@
 package es.lavanda.filebot.executor.service.impl;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.executor.amqp.ProducerService;
 import es.lavanda.filebot.executor.exception.FilebotAMCException;
-import es.lavanda.filebot.executor.exception.FilebotExecutorException;
 import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import es.lavanda.filebot.executor.model.FilebotExecution;
-import es.lavanda.filebot.executor.model.QbittorrentInfo;
 import es.lavanda.filebot.executor.model.FilebotExecution.FileExecutor;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
-import es.lavanda.filebot.executor.service.FileService;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
-import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
-import es.lavanda.lib.common.model.QbittorrentModel;
 import es.lavanda.lib.common.model.filebot.FilebotAction;
-// import es.lavanda.lib.common.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -46,9 +34,6 @@ public class FilebotServiceImpl implements FilebotService {
     @Autowired
     private FilebotExecutionRepository filebotExecutionRepository;
 
-    // @Autowired
-    // private NotificationService notificationService;
-
     @Autowired
     private ExecutorService executorService;
 
@@ -56,13 +41,7 @@ public class FilebotServiceImpl implements FilebotService {
     private ProducerService producerService;
 
     @Autowired
-    private FileService fileService;
-
-    @Autowired
     private FilebotAMCExecutor filebotAMCExecutor;
-
-    @Autowired
-    private FilebotExecutorService filebotExecutorService;
 
     @Autowired
     private FilebotUtils filebotUtils;
@@ -76,6 +55,7 @@ public class FilebotServiceImpl implements FilebotService {
 
     @Override
     public void execute() {
+        log.info("On Execution");
         List<FilebotExecution> filebotExecutionsNotProcessed = filebotExecutionRepository
                 .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
         for (FilebotExecution filebotExecution : filebotExecutionsNotProcessed) {
@@ -179,19 +159,18 @@ public class FilebotServiceImpl implements FilebotService {
                 break;
             case FILES_NOT_FOUND:
                 log.info("Files not found");
-                filesNotFound(filebotExecution, execution);
+                filebotExecution.setStatus(FilebotStatus.FILES_NOT_FOUND);
+                save(filebotExecution);
+                break;
+            case ERROR:
+                log.info("Error on execution.");
+                filebotExecution.setStatus(FilebotStatus.ERROR);
+                save(filebotExecution);
                 break;
             default:
                 break;
         }
         execute();
-    }
-
-    private void filesNotFound(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
-        log.info("filesNotFound {}", execution);
-        filebotExecution.setStatus(FilebotStatus.FILES_NOT_FOUND);
-        filebotExecution.setLog(execution.getLog());
-        save(filebotExecution);
     }
 
     private void fileExist(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
@@ -285,7 +264,6 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecution.setFiles(filesExecutor);
         filebotExecution.setNewPath(newParentFolderPath);
         filebotExecution.setStatus(FilebotStatus.PROCESSED);
-        filebotExecution.setLog(execution.getLog());
         if (FilebotAction.MOVE.equals(filebotExecution.getAction())) {
             // TODO: SEND MESSAGE TO TELEGRAM TO CONFIRM DELETE WITH LS TO SEE THE FILES TO
             // DELETE
