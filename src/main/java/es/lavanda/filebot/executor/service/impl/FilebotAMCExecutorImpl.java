@@ -99,7 +99,6 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         if (execution.getExitStatus() == 3) {
             throw new FilebotAMCException(Type.ERROR, execution);
         }
-
     }
 
     private boolean notContainsProcessedFile(FilebotCommandExecution execution) {
