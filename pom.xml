@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-executor</artifactId>
-	<version>0.0.105</version>
+	<version>0.0.106-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-executor</name>
