@@ -77,7 +77,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
         filebotExecution.setEnglish(true);
       }
       filebotExecution
-          .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, true,
+          .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), null, null, false,
               filebotExecution.isEnglish(), filebotExecution.getAction()));
       return filebotExecutionRepository.save(filebotExecution);
     }
