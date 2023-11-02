@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.executor.exception.FilebotAMCException;
 import es.lavanda.filebot.executor.exception.FilebotAMCException.Type;
-import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import es.lavanda.filebot.executor.exception.FilebotExecutorException;
+import es.lavanda.filebot.executor.model.FilebotCommandExecution;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
 import es.lavanda.filebot.executor.util.StreamGobbler;
 import lombok.RequiredArgsConstructor;

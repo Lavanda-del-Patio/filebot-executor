@@ -112,6 +112,7 @@ public class FilebotServiceImpl implements FilebotService {
         FilebotCommandExecution execution = new FilebotCommandExecution();
         try {
             filebotExecution.setStatus(FilebotStatus.ON_FILEBOT_EXECUTION);
+            filebotExecution.setLog("");
             save(filebotExecution);
             execution = filebotAMCExecutor
                     .execute(filebotExecution.getCommand());
