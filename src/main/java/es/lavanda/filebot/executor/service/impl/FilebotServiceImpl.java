@@ -23,7 +23,6 @@ import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
 import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
-import es.lavanda.lib.common.model.FilebotExecutionODTO;
 import es.lavanda.lib.common.model.filebot.FilebotAction;
 import lombok.extern.slf4j.Slf4j;
 
@@ -71,21 +70,7 @@ public class FilebotServiceImpl implements FilebotService {
         }
     }
 
-    @Override
-    public void resolutionTelegramBot(FilebotExecutionODTO filebotExecutionODTO) {
-        log.info("Resolution: {}", filebotExecutionODTO);
-        Optional<FilebotExecution> optFilebotExecution = filebotExecutionRepository
-                .findById(filebotExecutionODTO.getId());
-        if (optFilebotExecution.isPresent()
-                && Boolean.FALSE.equals(optFilebotExecution.get().getStatus() == FilebotStatus.PROCESSED)) {
-            processWithQuery(optFilebotExecution.get(),
-                    Optional.ofNullable(filebotExecutionODTO.getQuery())
-                            .orElse(filebotExecutionODTO.getSelectedPossibilitie()),
-                    filebotExecutionODTO.getLabel(), filebotExecutionODTO.isForceStrict());
-        } else {
-            log.error("FilebotExecution not found: {}", filebotExecutionODTO);
-        }
-    }
+
 
     @Override
     public void execute(String id) {
@@ -128,14 +113,6 @@ public class FilebotServiceImpl implements FilebotService {
         }
     }
 
-    private void processWithQuery(FilebotExecution filebotExecution, String query, String utLabel,
-            boolean forceStrict) {
-        log.info("On ExecutionComplete with Query");
-        filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()), query,
-                utLabel, forceStrict, filebotExecution.isEnglish(), filebotExecution.getAction()));
-        filebotExecution.setStatus(FilebotStatus.PENDING);
-        filebotExecutionRepository.save(filebotExecution);
-    }
 
     private void handleException(FilebotExecution filebotExecution, FilebotCommandExecution execution,
             FilebotAMCException e) {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import es.lavanda.lib.common.model.filebot.FilebotAction;
+import es.lavanda.lib.common.model.filebot.FilebotCategory;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
@@ -31,7 +32,7 @@ public class FilebotUtils {
                 getFilebotPathData().trim() + "/license.psm";
     }
 
-    public String getFilebotCommand(Path folderPath, String query, String label, boolean forceStrict, boolean english,
+    public String getFilebotCommand(Path folderPath, String query, FilebotCategory  category, boolean forceStrict, boolean english,
             FilebotAction action) {
         log.info("FOLDER PATH {}", folderPath);
         String queryFilled = "";
@@ -45,8 +46,17 @@ public class FilebotUtils {
         if (forceStrict) {
             nonStrict = FilebotConstants.NON_STRICT.toString();
         }
-        if (Objects.nonNull(label)) {
-            utLabel = " --def \"ut_label=" + label.toLowerCase() + "\" ";
+        if (Objects.nonNull(category)) {
+            switch (category) {
+                case TV,TV_EN:
+            utLabel = " --def \"ut_label=SERIES\" ";
+                    break;
+                case FILM:
+            utLabel = " --def \"ut_label=MOVIE\" ";
+                    break;
+                default:
+                    break;
+            }
         }
         if (english) {
             showsFormat = getShowsEnFormat();
