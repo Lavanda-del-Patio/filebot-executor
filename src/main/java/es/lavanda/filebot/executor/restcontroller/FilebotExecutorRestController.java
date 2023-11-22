@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import es.lavanda.filebot.executor.model.FilebotExecution;
+import es.lavanda.filebot.executor.model.QbittorrentModel;
 import es.lavanda.filebot.executor.service.FilebotExecutorService;
 import es.lavanda.filebot.executor.service.FilebotService;
-import es.lavanda.lib.common.model.QbittorrentModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,7 +61,8 @@ public class FilebotExecutorRestController {
     @PostMapping
     public ResponseEntity<FilebotExecution> createNewExecution(@RequestBody QbittorrentModel qbittorrentModel) {
         log.info("Received qbittorrentModel: {}", qbittorrentModel);
-        return ResponseEntity.ok(filebotExecutorService.createNewExecution(qbittorrentModel));
+        filebotExecutorService.createNewExecution(qbittorrentModel);
+        return ResponseEntity.created(null).build();
     }
 
     @PostMapping("/execute")
