@@ -43,6 +43,9 @@ public class FilebotExecution implements Serializable {
     @Field("english")
     private boolean english;
 
+    @Field("force_strict")
+    private boolean forceStrict;
+
     @Field("category")
     private FilebotCategory category;
 

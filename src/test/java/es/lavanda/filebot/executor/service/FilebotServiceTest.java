@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import es.lavanda.filebot.executor.service.impl.FilebotServiceImpl;
-import lombok.SneakyThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class FilebotServiceTest {
@@ -33,7 +32,6 @@ public class FilebotServiceTest {
 
     @Disabled
     @Test
-    @SneakyThrows
     public void test() {
         // filebotService.execute();
     }
