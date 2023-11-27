@@ -88,7 +88,6 @@ public class FileServiceImpl implements FileService {
 
     private boolean isValidExtension(String extension) {
         System.out.println("La extensión del archivo es: " + extension);
-
         if (extension.equalsIgnoreCase("mkv") || extension.equalsIgnoreCase("mp4")
                 || extension.equalsIgnoreCase("avi")) {
             return true;
@@ -99,7 +98,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public boolean isValidForFilebot(String fileOrDirectory) {
         File file = new File(fileOrDirectory);
-
         if (!file.exists()) {
             throw new FilebotExecutorException(String.format("File not found %s", fileOrDirectory));
         }
