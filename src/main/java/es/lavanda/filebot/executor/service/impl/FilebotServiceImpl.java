@@ -207,6 +207,7 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecutionIDTO.setId(filebotExecution.getId());
         filebotExecutionIDTO.setFiles(filesExecutor.stream().map(fe -> fe.getFile()).collect(Collectors.toList()));
         filebotExecutionIDTO.setPath(filebotExecution.getPath().toString());
+        filebotExecutionIDTO.setName(filebotExecution.getName());
         producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
         filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM);
         filebotExecution.setLog(execution.getLog());

@@ -116,6 +116,7 @@ public class FilebotExecutorServiceImpl implements FilebotExecutorService {
             filebotExecutionIDTO.setId(filebotExecution.getId());
             filebotExecutionIDTO.setPath(filebotExecution.getPath().toString());
             filebotExecutionIDTO.setFiles(fileService.ls(filebotExecution.getPath()));
+            filebotExecutionIDTO.setName(filebotExecution.getName());
             producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
           } else {
             log.info("Path not valid, not contain valid files or is empty{}", file);
