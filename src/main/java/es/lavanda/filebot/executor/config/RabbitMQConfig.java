@@ -29,9 +29,9 @@ public class RabbitMQConfig {
 
     private static final String QUEUE_MESSAGES_DLQ = "filebot-telegram-resolution-dlq";
 
-    private static final String QUEUE_MESSAGES_TEST = "filebot-telegram-resolution-test";
+    private static final String QUEUE_MESSAGES_TEST = "filebot-telegram-test-resolution";
 
-    private static final String QUEUE_MESSAGES_TEST_DLQ = "filebot-telegram-resolution-test-dlq";
+    private static final String QUEUE_MESSAGES_TEST_DLQ = "filebot-telegram-test-resolution-dlq";
 
     private static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
 
