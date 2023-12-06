@@ -45,19 +45,20 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private FilebotCommandExecution filebotExecution(String command) {
         Process process = null;
+        StringBuilder sbuilder = new StringBuilder();
         try {
-            process = new ProcessBuilder("bash", "-c", command).redirectErrorStream(true)
-                    .start();
-            StringBuilder sbuilder = new StringBuilder();
+            process = new ProcessBuilder("bash", "-c", command).redirectErrorStream(true).start();
             StreamGobbler streamGobbler = new StreamGobbler(process.getInputStream(), line -> {
                 log.info("Filebot commandLine: {}", line);
-                sbuilder.append(line);
-                sbuilder.append("\n");
+                sbuilder.append(line).append("\n");
             });
             executorService.submit(streamGobbler);
+            int exitStatus = process.waitFor();
+            String logResult = sbuilder.toString();
+
             FilebotCommandExecution filebotCommandExecution = new FilebotCommandExecution();
-            filebotCommandExecution.setExitStatus(process.waitFor());
-            filebotCommandExecution.setLog(sbuilder.toString());
+            filebotCommandExecution.setExitStatus(exitStatus);
+            filebotCommandExecution.setLog(logResult);
             log.info("Exit status: {}", filebotCommandExecution.getExitStatus());
             return filebotCommandExecution;
         } catch (InterruptedException | IOException e) {
