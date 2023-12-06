@@ -75,12 +75,13 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
       filebotExecution.setCategory(filebotExecutionODTO.getCategory());
       filebotExecution.setAction(filebotExecutionODTO.getAction());
       filebotExecution.setForceStrict(filebotExecutionODTO.isForceStrict());
+      filebotExecution.setQuery(filebotExecutionODTO.getQuery());
       if (filebotExecution.getCategory().equals(FilebotCategory.TV_EN)) {
         filebotExecution.setEnglish(true);
       }
       filebotExecution
           .setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()),
-              filebotExecutionODTO.getQuery(), filebotExecution.getCategory(), filebotExecution.isForceStrict(),
+              filebotExecution.getQuery(), filebotExecution.getCategory(), filebotExecution.isForceStrict(),
               filebotExecution.isEnglish(), filebotExecution.getAction(), filebotExecution.isOnTestPhase()));
       filebotExecution.setStatus(FilebotStatus.PENDING);
       filebotExecutionRepository.save(filebotExecution);
@@ -97,23 +98,15 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
         .findById(filebotExecutionTestODTO.getId());
     if (optFilebotExecution.isPresent()
         && Boolean.FALSE.equals(optFilebotExecution.get().getStatus() == FilebotStatus.PROCESSED)) {
-      if (filebotExecutionTestODTO.isApproved()) {
-        FilebotExecution filebotExecution = optFilebotExecution.get();
-        filebotExecution.setOnTestPhase(false);
-        filebotExecution.setCommand(
-            filebotUtils.getFilebotCommand(null, null, null, false, false, null, filebotExecution.isOnTestPhase()));
-        save(filebotExecution);
-        log.info("FilebotExecution approved and updated: {}", filebotExecution);
-        filebotService.execute(filebotExecution);
-      } else {
-        FilebotExecution filebotExecution = optFilebotExecution.get();
-        filebotExecution.setOnTestPhase(true);
-        filebotExecution.setCommand(
-            filebotUtils.getFilebotCommand(null, null, null, false, false, null, filebotExecution.isOnTestPhase()));
-        save(filebotExecution);
-        log.info("FilebotExecution not approved and go to re-execute: {}", filebotExecution);
-        filebotService.execute(filebotExecution);
-      }
+      FilebotExecution filebotExecution = optFilebotExecution.get();
+      filebotExecution.setOnTestPhase(Boolean.FALSE.equals(filebotExecutionTestODTO.isApproved()));
+      filebotExecution.setCommand(
+          filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()),
+              filebotExecution.getQuery(), filebotExecution.getCategory(), filebotExecution.isForceStrict(),
+              filebotExecution.isEnglish(), filebotExecution.getAction(), filebotExecution.isOnTestPhase()));
+      save(filebotExecution);
+      log.info("FilebotExecution {} approved and updated: {}", filebotExecutionTestODTO.isApproved(), filebotExecution);
+      filebotService.execute(filebotExecution);
     } else {
       log.error("FilebotExecution not found: {}", filebotExecutionTestODTO.getId());
     }
@@ -209,7 +202,7 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
       fe.setAction(filebotExecution.getAction());
       fe.setOnTestPhase(true);
       fe.setCommand(Objects.nonNull(filebotExecution.getCommand()) ? filebotExecution.getCommand()
-          : filebotUtils.getFilebotCommand(Path.of(fe.getPath()), null,
+          : filebotUtils.getFilebotCommand(Path.of(fe.getPath()), fe.getQuery(),
               fe.getCategory(), fe.isForceStrict(), fe.isEnglish(), filebotExecution.getAction(), fe.isOnTestPhase()));
       fe.setStatus(FilebotStatus.UNPROCESSED);
       return fe;
@@ -241,7 +234,8 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
     if (optFilebotExecution.isPresent()) {
       FilebotExecution filebotExecution = optFilebotExecution.get();
       filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()),
-          null, filebotExecution.getCategory(), filebotExecution.isForceStrict(), filebotExecution.isEnglish(),
+          filebotExecution.getQuery(), filebotExecution.getCategory(), filebotExecution.isForceStrict(),
+          filebotExecution.isEnglish(),
           filebotExecution.getAction(), filebotExecution.isOnTestPhase()));
       filebotService.execute(optFilebotExecution.get());
       save(filebotExecution);
@@ -257,7 +251,8 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
         .findByStatusIn(List.of("UNPROCESSED", "PENDING"));
     for (FilebotExecution filebotExecution : filebotExecutions) {
       filebotExecution.setCommand(filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()),
-          null, filebotExecution.getCategory(), filebotExecution.isForceStrict(), filebotExecution.isEnglish(),
+          filebotExecution.getQuery(), filebotExecution.getCategory(), filebotExecution.isForceStrict(),
+          filebotExecution.isEnglish(),
           filebotExecution.getAction(), filebotExecution.isOnTestPhase()));
       save(filebotExecution);
       filebotService.execute(filebotExecution);
