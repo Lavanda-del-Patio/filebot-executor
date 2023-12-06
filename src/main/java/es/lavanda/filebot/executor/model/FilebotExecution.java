@@ -49,6 +49,9 @@ public class FilebotExecution implements Serializable {
     @Field("on_test_phase")
     private boolean onTestPhase = true;
 
+    @Field("query")
+    private String query;
+
     @Field("category")
     private FilebotCategory category;
 
