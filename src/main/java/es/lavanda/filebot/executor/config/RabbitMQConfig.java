@@ -25,10 +25,15 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String QUEUE_MESSAGES = "filebot-telegram-resolution";
-    public static final String QUEUE_MESSAGES_DLQ = "filebot-telegram-resolution-dlq";
+    private static final String QUEUE_MESSAGES = "filebot-telegram-resolution";
 
-    public static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
+    private static final String QUEUE_MESSAGES_DLQ = "filebot-telegram-resolution-dlq";
+
+    private static final String QUEUE_MESSAGES_TEST = "filebot-telegram-resolution-test";
+
+    private static final String QUEUE_MESSAGES_TEST_DLQ = "filebot-telegram-resolution-test-dlq";
+
+    private static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
 
     @Bean
     public DefaultClassMapper classMapper() {
@@ -80,5 +85,21 @@ public class RabbitMQConfig {
     @Bean
     Queue deadLetterQueue() {
         return QueueBuilder.durable(QUEUE_MESSAGES_DLQ).build();
+    }
+
+    @Bean
+    Binding bindingMessagesTest() {
+        return BindingBuilder.bind(messagesQueue()).to(messagesExchange()).with(QUEUE_MESSAGES_TEST);
+    }
+
+    @Bean
+    Queue messagesQueueTest() {
+        return QueueBuilder.durable(QUEUE_MESSAGES_TEST).withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_MESSAGES_TEST_DLQ).build();
+    }
+
+    @Bean
+    Queue deadLetterQueueTest() {
+        return QueueBuilder.durable(QUEUE_MESSAGES_TEST_DLQ).build();
     }
 }
