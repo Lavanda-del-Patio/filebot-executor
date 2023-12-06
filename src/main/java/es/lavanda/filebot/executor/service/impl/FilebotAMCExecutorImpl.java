@@ -31,6 +31,8 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
 
+    private static final Pattern PATTERN_MOVED_CONTENT = Pattern.compile("\\[(.*)\\] from \\[(.*)\\] to \\[(.*)\\]");
+
     @Override
     public FilebotCommandExecution execute(String command) {
         FilebotCommandExecution execution = filebotExecution(command);
@@ -82,7 +84,9 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
     private void isNoFilesSelected(FilebotCommandExecution execution) {
         Matcher matcherNoFilesSelected = PATTERN_NOT_FILE_SELECTED.matcher(execution.getLog());
         Matcher matcherFilesNotFound = PATTERN_FILES_NOT_FOUND.matcher(execution.getLog());
-        if (execution.getExitStatus() == 100 || matcherNoFilesSelected.find() || matcherFilesNotFound.find()) {
+        Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution.getLog());
+        if ((execution.getExitStatus() == 100 || matcherNoFilesSelected.find() || matcherFilesNotFound.find())
+                && Boolean.FALSE.equals(matcherMovedContent.find())) {
             throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
         }
     }
