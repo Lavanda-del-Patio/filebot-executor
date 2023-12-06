@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import es.lavanda.filebot.executor.model.FilebotExecution;
 import es.lavanda.filebot.executor.model.QbittorrentModel;
-import es.lavanda.filebot.executor.service.FilebotExecutorService;
+import es.lavanda.filebot.executor.service.FilebotExecutionService;
 import es.lavanda.filebot.executor.service.FilebotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +34,10 @@ import lombok.extern.slf4j.Slf4j;
         "https://pre.lavandadelpatio.es" }, allowCredentials = "true", exposedHeaders = "*", methods = {
                 RequestMethod.OPTIONS, RequestMethod.DELETE, RequestMethod.GET, RequestMethod.PATCH, RequestMethod.POST,
                 RequestMethod.PUT }, originPatterns = { "*" })
-public class FilebotExecutorRestController {
+public class FilebotExecutionRestController {
 
     @Autowired
-    private FilebotExecutorService filebotExecutorService;
-
-    @Autowired
-    private FilebotService filebotService;
+    private FilebotExecutionService filebotExecutorService;
 
     @GetMapping
     public ResponseEntity<Page<FilebotExecution>> getAll(Pageable pageable,
@@ -68,14 +65,14 @@ public class FilebotExecutorRestController {
     @PostMapping("/execute")
     public ResponseEntity<?> execute() {
         log.info("Manual execution");
-        filebotService.execute();
+        filebotExecutorService.forceExecute();
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @PostMapping("/execute/{id}")
     public ResponseEntity<?> execute(@PathVariable String id) {
         log.info("Manual execution for ID: {}", id);
-        filebotService.execute(id);
+        filebotExecutorService.forceExecute(id);
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 

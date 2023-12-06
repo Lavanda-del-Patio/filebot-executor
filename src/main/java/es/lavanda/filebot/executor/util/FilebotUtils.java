@@ -32,8 +32,9 @@ public class FilebotUtils {
                 getFilebotPathData().trim() + "/license.psm";
     }
 
-    public String getFilebotCommand(Path folderPath, String query, FilebotCategory  category, boolean forceStrict, boolean english,
-            FilebotAction action) {
+    public String getFilebotCommand(Path folderPath, String query, FilebotCategory category, boolean forceStrict,
+            boolean english,
+            FilebotAction action, boolean testPhase) {
         log.info("FOLDER PATH {}", folderPath);
         String queryFilled = "";
         String nonStrict = "";
@@ -48,11 +49,11 @@ public class FilebotUtils {
         }
         if (Objects.nonNull(category)) {
             switch (category) {
-                case TV,TV_EN:
-            utLabel = " --def \"ut_label=SERIES\" ";
+                case TV, TV_EN:
+                    utLabel = " --def \"ut_label=SERIES\" ";
                     break;
                 case FILM:
-            utLabel = " --def \"ut_label=MOVIE\" ";
+                    utLabel = " --def \"ut_label=MOVIE\" ";
                     break;
                 default:
                     break;
@@ -63,7 +64,7 @@ public class FilebotUtils {
         }
         return FILEBOT + FilebotConstants.SCRIPT_AMC.toString() +
                 getOutputFormat() +
-                getAction(action) +
+                getAction(action, testPhase) +
                 getDatabase() +
                 lang +
                 FilebotConstants.ORDER_AIRDATE.toString() +
@@ -78,8 +79,8 @@ public class FilebotUtils {
                 queryFilled + nonStrict + utLabel;
     }
 
-    private String getAction(FilebotAction action) {
-        if (Boolean.TRUE.equals(FILEBOT_TEST_ENABLED)) {
+    private String getAction(FilebotAction action, boolean testPhase) {
+        if (Boolean.TRUE.equals(FILEBOT_TEST_ENABLED) || Boolean.TRUE.equals(testPhase)) {
             return FilebotConstants.ACTION_TEST.toString();
         }
         switch (action) {

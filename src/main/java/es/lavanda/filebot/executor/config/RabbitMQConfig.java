@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Primary;
 
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
+import es.lavanda.lib.common.model.FilebotExecutionTestODTO;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 
 import java.util.HashMap;
@@ -39,6 +40,8 @@ public class RabbitMQConfig {
                 FilebotExecutionIDTO.class);
         idClassMapping.put("es.lavanda.lib.common.model.FilebotExecutionODTO",
                 FilebotExecutionODTO.class);
+        idClassMapping.put("es.lavanda.lib.common.model.FilebotExecutionTestODTO",
+                FilebotExecutionTestODTO.class);
         classMapper.setIdClassMapping(idClassMapping);
         return classMapper;
     }
