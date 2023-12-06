@@ -46,6 +46,9 @@ public class FilebotExecution implements Serializable {
     @Field("force_strict")
     private boolean forceStrict;
 
+    @Field("on_test_phase")
+    private boolean onTestPhase = true;
+
     @Field("category")
     private FilebotCategory category;
 
@@ -73,10 +76,10 @@ public class FilebotExecution implements Serializable {
     private String expireAfterFourteenDays;
 
     public enum FilebotStatus {
-
-        UNPROCESSED, ON_TELEGRAM, PENDING, ON_FILEBOT_EXECUTION, PROCESSED, FILES_EXISTED_IN_DESTINATION, ERROR,
+        UNPROCESSED, ON_TELEGRAM, PENDING, ON_FILEBOT_EXECUTION, ON_TELEGRAM_TEST, PROCESSED,
+        FILES_EXISTED_IN_DESTINATION,
+        ERROR,
         FILES_NOT_FOUND;
-
     }
 
     @Data

@@ -20,18 +20,17 @@ import es.lavanda.filebot.executor.model.FilebotExecution.FileExecutor;
 import es.lavanda.filebot.executor.model.FilebotExecution.FilebotStatus;
 import es.lavanda.filebot.executor.repository.FilebotExecutionRepository;
 import es.lavanda.filebot.executor.service.FilebotAMCExecutor;
+import es.lavanda.filebot.executor.service.FilebotExecutionService;
 import es.lavanda.filebot.executor.service.FilebotService;
 import es.lavanda.filebot.executor.util.FilebotUtils;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
+import es.lavanda.lib.common.model.FilebotExecutionTestIDTO;
 import es.lavanda.lib.common.model.filebot.FilebotAction;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 public class FilebotServiceImpl implements FilebotService {
-
-    @Autowired
-    private FilebotExecutionRepository filebotExecutionRepository;
 
     @Autowired
     private ExecutorService executorService;
@@ -45,6 +44,9 @@ public class FilebotServiceImpl implements FilebotService {
     @Autowired
     private FilebotUtils filebotUtils;
 
+    @Autowired
+    private FilebotExecutionRepository filebotExecutionRepository;// FIXME: DEPENDENCIA CIRCULAR
+
     private static final Pattern PATTERN_SELECT_CONTENT = Pattern.compile("Group:.*=> \\[(.*)\\]");
 
     private static final Pattern PATTERN_MOVED_CONTENT = Pattern.compile("\\[(.*)\\] from \\[(.*)\\] to \\[(.*)\\]");
@@ -53,43 +55,18 @@ public class FilebotServiceImpl implements FilebotService {
             .compile("Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
 
     @Override
-    public void execute() {
+    public void execute(FilebotExecution filebotExecution) {
         log.info("On Execution");
-        List<FilebotExecution> filebotExecutionsNotProcessed = filebotExecutionRepository
-                .findByStatusIn(List.of(FilebotStatus.UNPROCESSED.name(), FilebotStatus.PENDING.name()));
-        for (FilebotExecution filebotExecution : filebotExecutionsNotProcessed) {
-            Runnable runnableTask = () -> {
-                try {
-                    executionWithCommand(filebotExecution);
-                } catch (Exception e) {
-                    log.error("Error executing filebot", e);
-                    throw new RuntimeException("Error executing filebot", e);
-                }
-            };
-            executorService.execute(runnableTask);
-        }
-    }
+        Runnable runnableTask = () -> {
+            try {
+                executionWithCommand(filebotExecution);
+            } catch (Exception e) {
+                log.error("Error executing filebot", e);
+                throw new RuntimeException("Error executing filebot", e);
+            }
+        };
+        executorService.execute(runnableTask);
 
-
-
-    @Override
-    public void execute(String id) {
-        Optional<FilebotExecution> optFilebotExecution = filebotExecutionRepository
-                .findById(id);
-        if (optFilebotExecution.isPresent()) {
-            Runnable runnableTask = () -> {
-                try {
-                    executionWithCommand(optFilebotExecution.get());
-                } catch (Exception e) {
-                    log.error("Error executing filebot", e);
-                    throw new RuntimeException("Error executing filebot", e);
-                }
-            };
-            executorService.execute(runnableTask);
-
-        } else {
-            log.error("FilebotExecution not found: {}", id);
-        }
     }
 
     private void executionWithCommand(FilebotExecution filebotExecution) {
@@ -98,21 +75,20 @@ public class FilebotServiceImpl implements FilebotService {
         try {
             filebotExecution.setStatus(FilebotStatus.ON_FILEBOT_EXECUTION);
             filebotExecution.setLog("");
-            save(filebotExecution);
+            filebotExecutionRepository.save(filebotExecution);
             execution = filebotAMCExecutor
-                    .execute(filebotExecution.getCommand());
+                    .execute(filebotExecution.getCommand()); // FIXME:
             log.info("Result of Execution {}", execution);
             filebotExecution.setLog(execution.getLog());
-            save(filebotExecution);
+            filebotExecutionRepository.save(filebotExecution);
             completedFilebotExecution(filebotExecution, execution);
         } catch (FilebotAMCException e) {
             execution = e.getFilebotCommandExecution();
             filebotExecution.setLog(execution.getLog());
-            save(filebotExecution);
+            filebotExecutionRepository.save(filebotExecution);
             handleException(filebotExecution, e.getFilebotCommandExecution(), e);
         }
     }
-
 
     private void handleException(FilebotExecution filebotExecution, FilebotCommandExecution execution,
             FilebotAMCException e) {
@@ -124,7 +100,7 @@ public class FilebotServiceImpl implements FilebotService {
             case REGISTER:
                 log.info("Handling REGISTER");
                 filebotExecution.setStatus(FilebotStatus.ERROR);
-                save(filebotExecution);
+                filebotExecutionRepository.save(filebotExecution);
                 tryLicensed();// Send notification;
                 break;
             case SELECTED_OPTIONS:
@@ -138,17 +114,16 @@ public class FilebotServiceImpl implements FilebotService {
             case FILES_NOT_FOUND:
                 log.info("Files not found");
                 filebotExecution.setStatus(FilebotStatus.FILES_NOT_FOUND);
-                save(filebotExecution);
+                filebotExecutionRepository.save(filebotExecution);
                 break;
             case ERROR:
                 log.info("Error on execution.");
                 filebotExecution.setStatus(FilebotStatus.ERROR);
-                save(filebotExecution);
+                filebotExecutionRepository.save(filebotExecution);
                 break;
             default:
                 break;
         }
-        execute();
     }
 
     private void fileExist(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
@@ -169,7 +144,7 @@ public class FilebotServiceImpl implements FilebotService {
         filebotExecution.setFiles(filesExecutor);
         filebotExecution.setStatus(FilebotStatus.FILES_EXISTED_IN_DESTINATION);
         filebotExecution.setLog(execution.getLog());
-        save(filebotExecution);
+        filebotExecutionRepository.save(filebotExecution);
     }
 
     private void tryLicensed() {
@@ -211,15 +186,51 @@ public class FilebotServiceImpl implements FilebotService {
         producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
         filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM);
         filebotExecution.setLog(execution.getLog());
-        save(filebotExecution);
-    }
-
-    private FilebotExecution save(FilebotExecution filebotExecution) {
-        return filebotExecutionRepository.save(filebotExecution);
+        filebotExecutionRepository.save(filebotExecution);
     }
 
     private void completedFilebotExecution(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
         log.info("CompletedFilebotExecution {}", execution);
+
+        if (filebotExecution.isOnTestPhase()) {
+            completedExecutionTest(filebotExecution, execution);
+
+        } else {
+            completedExecution(filebotExecution, execution);
+        }
+    }
+
+    private void completedExecutionTest(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
+        Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution.getLog());
+        List<String> oldFilesName = new ArrayList<>();
+        List<String> newFilesname = new ArrayList<>();
+        while (matcherMovedContent.find()) {
+            String fromContent = matcherMovedContent.group(2);
+            String toContent = matcherMovedContent.group(3);
+            log.info("From Content {}", fromContent);
+            log.info("To Content {}", toContent);
+            oldFilesName.add(Path.of(fromContent).getFileName().toString());
+            newFilesname.add(Path.of(toContent).getFileName().toString());
+        }
+        List<FileExecutor> filesExecutor = new ArrayList<>();
+        for (int i = 0; i < oldFilesName.size(); i++) {
+            FileExecutor fileExecutor = new FileExecutor();
+            fileExecutor.setFile(oldFilesName.get(i));
+            fileExecutor.setNewFile(newFilesname.get(i));
+            filesExecutor.add(fileExecutor);
+        }
+        FilebotExecutionTestIDTO filebotExecutionTestIDTO = new FilebotExecutionTestIDTO();
+        filebotExecutionTestIDTO.setId(filebotExecution.getId());
+        filebotExecutionTestIDTO.setFiles(filesExecutor.stream().map(fe -> fe.getFile()).collect(Collectors.toList()));
+        filebotExecutionTestIDTO.setPath(filebotExecution.getPath().toString());
+        filebotExecutionTestIDTO.setName(filebotExecution.getName());
+        filebotExecution.setLog(execution.getLog());
+        filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM_TEST);
+        filebotExecutionRepository.save(filebotExecution);
+        producerService.sendFilebotToConfirmTest(filebotExecutionTestIDTO);
+    }
+
+    private void completedExecution(FilebotExecution filebotExecution, FilebotCommandExecution execution) {
         Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution.getLog());
         List<String> oldFilesName = new ArrayList<>();
         List<String> newFilesname = new ArrayList<>();
@@ -248,7 +259,7 @@ public class FilebotServiceImpl implements FilebotService {
             // DELETE
             // fileService.rmdir(filebotExecution.getPath().toString());
         }
-        save(filebotExecution);
+        filebotExecutionRepository.save(filebotExecution);
     }
 
 }
