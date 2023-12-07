@@ -221,7 +221,8 @@ public class FilebotServiceImpl implements FilebotService {
         }
         FilebotExecutionTestIDTO filebotExecutionTestIDTO = new FilebotExecutionTestIDTO();
         filebotExecutionTestIDTO.setId(filebotExecution.getId());
-        filebotExecutionTestIDTO.setFiles(filesExecutor.stream().map(fe -> fe.getFile()).collect(Collectors.toList()));
+        filebotExecutionTestIDTO.setFiles(oldFilesName.stream().map(fe -> fe).collect(Collectors.toList()));
+        filebotExecutionTestIDTO.setPossibilities(newFilesname.stream().map(fe -> fe).collect(Collectors.toList()));
         filebotExecutionTestIDTO.setPath(filebotExecution.getPath().toString());
         filebotExecutionTestIDTO.setName(filebotExecution.getName());
         filebotExecution.setLog(execution.getLog());
