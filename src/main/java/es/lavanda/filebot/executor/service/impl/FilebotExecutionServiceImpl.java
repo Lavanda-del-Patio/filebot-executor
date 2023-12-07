@@ -100,6 +100,7 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
         && Boolean.FALSE.equals(optFilebotExecution.get().getStatus() == FilebotStatus.PROCESSED)) {
       FilebotExecution filebotExecution = optFilebotExecution.get();
       filebotExecution.setOnTestPhase(Boolean.FALSE.equals(filebotExecutionTestODTO.isApproved()));
+      filebotExecution.setStatus(FilebotStatus.PENDING);
       filebotExecution.setCommand(
           filebotUtils.getFilebotCommand(Path.of(filebotExecution.getPath()),
               filebotExecution.getQuery(), filebotExecution.getCategory(), filebotExecution.isForceStrict(),
