@@ -29,16 +29,17 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private static final Pattern PATTERN_NOT_FILE_SELECTED = Pattern.compile("No files selected for processing");
 
-    private static final Pattern PATTERN_FILE_EXISTS = Pattern.compile("Skipped.*because.*already exists");
-
     private static final Pattern PATTERN_MOVED_CONTENT = Pattern.compile("\\[(.*)\\] from \\[(.*)\\] to \\[(.*)\\]");
+
+    private static final Pattern PATTERN_SKIPPED_CONTENT = Pattern
+            .compile("\\[(.*)\\] Skipped \\[(.*)\\] because \\[(.*)\\] already exists");
 
     @Override
     public FilebotCommandExecution execute(String command) {
         FilebotCommandExecution execution = filebotExecution(command);
         isNotLicensed(execution);
         isNonStrictOrQuery(execution);
-        isNoFilesSelected(execution);
+        isNoFilesSelectedOrSkipped(execution);
         isChooseOptions(execution);
         isFileExists(execution);
         isError(execution);
@@ -81,12 +82,14 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
         }
     }
 
-    private void isNoFilesSelected(FilebotCommandExecution execution) {
+    private void isNoFilesSelectedOrSkipped(FilebotCommandExecution execution) {
         Matcher matcherNoFilesSelected = PATTERN_NOT_FILE_SELECTED.matcher(execution.getLog());
         Matcher matcherFilesNotFound = PATTERN_FILES_NOT_FOUND.matcher(execution.getLog());
         Matcher matcherMovedContent = PATTERN_MOVED_CONTENT.matcher(execution.getLog());
+        Matcher matcherSkippedContent = PATTERN_SKIPPED_CONTENT.matcher(execution.getLog());
         if ((execution.getExitStatus() == 100 || matcherNoFilesSelected.find() || matcherFilesNotFound.find())
-                && Boolean.FALSE.equals(matcherMovedContent.find())) {
+                && Boolean.FALSE.equals(matcherMovedContent.find())
+                && Boolean.FALSE.equals(matcherSkippedContent.find())) {
             throw new FilebotAMCException(Type.FILES_NOT_FOUND, execution);
         }
     }
@@ -115,7 +118,7 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
     }
 
     private void isFileExists(FilebotCommandExecution execution) {
-        Matcher matcherMovedContent = PATTERN_FILE_EXISTS.matcher(execution.getLog());
+        Matcher matcherMovedContent = PATTERN_SKIPPED_CONTENT.matcher(execution.getLog());
         if (matcherMovedContent.find()) {
             throw new FilebotAMCException(Type.FILE_EXIST, execution);
         }
