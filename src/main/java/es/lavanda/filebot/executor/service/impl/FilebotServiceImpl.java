@@ -115,6 +115,7 @@ public class FilebotServiceImpl implements FilebotService {
                 log.info("Files not found");
                 filebotExecution.setStatus(FilebotStatus.FILES_NOT_FOUND);
                 filebotExecutionRepository.save(filebotExecution);
+                //FIXME: SENDMESSAGE TO TELEGRAM TO INFORM
                 break;
             case ERROR:
                 log.info("Error on execution.");
