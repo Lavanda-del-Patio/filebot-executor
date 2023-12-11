@@ -137,13 +137,14 @@ public class FilebotExecutionServiceImpl implements FilebotExecutionService {
             fileExecutor.setFile(filebotUtils.getFilebotPathInput() + "/" + file);
             filebotExecution.setFiles(List.of(fileExecutor));
           }
-          filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM);
           if (filebotExecution.getFiles().size() > 0) {
+            filebotExecution.setStatus(FilebotStatus.ON_TELEGRAM);
             filebotExecution = filebotExecutionRepository.save(filebotExecution);
             FilebotExecutionIDTO filebotExecutionIDTO = new FilebotExecutionIDTO();
             filebotExecutionIDTO.setId(filebotExecution.getId());
             filebotExecutionIDTO.setPath(filebotExecution.getPath().toString());
-            filebotExecutionIDTO.setFiles(fileService.ls(filebotExecution.getPath()));
+            filebotExecutionIDTO.setFiles(filebotExecution.getFiles().stream().map(FileExecutor::getFile)
+                .toList());
             filebotExecutionIDTO.setName(filebotExecution.getName());
             producerService.sendFilebotExecutionToTelegram(filebotExecutionIDTO);
           } else {
