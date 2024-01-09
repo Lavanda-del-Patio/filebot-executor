@@ -23,7 +23,7 @@ public class FilebotAMCExecutorImpl implements FilebotAMCExecutor {
 
     private final ExecutorService executorService;
 
-    private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d file");
+    private static final Pattern PATTERN_PROCESSED_FILE = Pattern.compile("Processed \\d+ file");
 
     private static final Pattern PATTERN_FILES_NOT_FOUND = Pattern.compile("Exit status: 100");
 
